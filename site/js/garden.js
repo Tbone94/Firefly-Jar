@@ -145,18 +145,24 @@ function drawBackground() {
     const mw = Math.min(W, H) * 0.24;
     ctx.drawImage(moon, W * 0.04, H * 0.03, mw, mw * (moon.naturalHeight / moon.naturalWidth));
   }
-  // Clouds: one still, dim cluster tucked high in the sky. Static and
-  // unglowing on purpose — nothing a child could mistake for a firefly
-  // or feel pulled to tap.
-  const clouds = IMAGES.clouds;
-  if (clouds.complete && clouds.naturalWidth) {
-    // upper-middle sky: clear of the moon (top-left) and the sound
-    // button (top-right) in both orientations
-    const cw = W * 0.24;
-    ctx.globalAlpha = 0.5;
-    ctx.drawImage(clouds, W * 0.42, H * 0.07, cw, cw * (clouds.naturalHeight / clouds.naturalWidth));
-    ctx.globalAlpha = 1;
+  // Clouds: a few still, dim shapes scattered around the sky at varied
+  // sizes. Static and unglowing on purpose — nothing a child could
+  // mistake for a firefly or feel pulled to tap. Placements avoid the
+  // moon (top-left) and the sound button (top-right) in both orientations.
+  const CLOUD_SPOTS = [
+    ['cloudA', 0.30, 0.045, 0.17, 0.5],
+    ['cloudB', 0.52, 0.150, 0.11, 0.4],
+    ['cloudC', 0.05, 0.230, 0.13, 0.35],
+    ['cloudB', 0.80, 0.270, 0.10, 0.3],
+  ];
+  for (const [key, cx, cy, cw, ca] of CLOUD_SPOTS) {
+    const c = IMAGES[key];
+    if (!c.complete || !c.naturalWidth) continue;
+    const w2 = W * cw;
+    ctx.globalAlpha = ca;
+    ctx.drawImage(c, W * cx, H * cy, w2, w2 * (c.naturalHeight / c.naturalWidth));
   }
+  ctx.globalAlpha = 1;
 
   // distant pale bushes — bottom edge tucked behind the front foliage so
   // only the bumpy silhouette shows above it
