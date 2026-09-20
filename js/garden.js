@@ -90,58 +90,16 @@ function renderGarden() {
   }
   g.fillRect(0, hor + H * 0.05, W, H);
 
-  // dark bushes, dipping toward the center clearing
-  g.fillStyle = GARDEN.bushDark;
-  for (let i = 0; i <= 9; i++) {
-    const t = i / 9;
-    const side = Math.abs(t - 0.5) * 2;
-    const lift = side * H * 0.085;                   // rise at the edges
-    const r = W * (0.07 + rnd() * 0.05);
-    blob(g, t * W, H * 0.88 - lift + rnd() * H * 0.015, r, r * (0.75 + rnd() * 0.3));
-  }
-  g.fillStyle = GARDEN.bushMid;
-  for (let i = 0; i <= 7; i++) {
-    const t = i / 7;
-    const side = Math.abs(t - 0.5) * 2;
-    const lift = side * H * 0.06;
-    const r = W * (0.065 + rnd() * 0.045);
-    blob(g, t * W + W * 0.03, H * 0.92 - lift, r, r * (0.7 + rnd() * 0.3));
-  }
-
-  // blade tufts along the bush tops (lighter against dark bushes)
-  for (let i = 0; i < 14; i++) {
-    const x = rnd() * W;
-    const side = Math.abs(x / W - 0.5) * 2;
-    const y = H * (0.9 - side * 0.055) + rnd() * H * 0.02;
-    const h = H * (0.03 + rnd() * 0.045);
-    blade(g, x, y, h, (rnd() - 0.5) * h * 0.5, GARDEN.frond);
-  }
-
-  // bright grass mound with a gentle center clearing for the jar
+  // Bright grass mound with a gentle center clearing for the jar — the
+  // ground beneath the custom foliage strip. (The earlier procedural
+  // bushes, blade tufts, and fronds were replaced by the owner's custom
+  // scenery images, drawn per-frame in drawBackground once loaded.)
   g.fillStyle = GARDEN.grass;
   blob(g, W * 0.5, H * 1.06, W * 0.75, H * 0.16);
   blob(g, W * 0.12, H * 1.02, W * 0.3, H * 0.13);
   blob(g, W * 0.88, H * 1.02, W * 0.3, H * 0.13);
   g.fillStyle = GARDEN.grassLit;
   blob(g, W * 0.5, H * 1.09, W * 0.55, H * 0.12);
-
-  // soft blades framing the clearing (a gentle tone down from the mound,
-  // never dark spikes)
-  for (let i = 0; i < 10; i++) {
-    const t = rnd();
-    const x = W * (t < 0.5 ? 0.12 + t * 0.44 : 0.63 + (t - 0.5) * 0.5);
-    const y = H * (0.965 + rnd() * 0.03);
-    const h = H * (0.028 + rnd() * 0.028);
-    blade(g, x, y, h, (rnd() - 0.5) * h * 0.6, '#5da162');
-  }
-
-  // framing fronds: mid-green from the side edges, dark at bottom corners
-  frond(g, W * 0.015, H * 0.92, H * 0.15, 0.5, GARDEN.frond);
-  frond(g, W * 0.005, H * 0.99, H * 0.11, 0.85, GARDEN.frond, 4);
-  frond(g, W * 0.985, H * 0.92, H * 0.16, -0.5, GARDEN.frond);
-  frond(g, W * 0.995, H * 0.99, H * 0.1, -0.9, GARDEN.frond, 4);
-  frond(g, W * 0.07, H * 1.03, H * 0.1, 0.25, GARDEN.frondDark, 4);
-  frond(g, W * 0.93, H * 1.03, H * 0.1, -0.25, GARDEN.frondDark, 4);
 
   // faint stars — few and dim (the reference sky is nearly clean)
   stars = [];
@@ -165,15 +123,61 @@ function renderGarden() {
 
 /* ---------- per-frame draw: static scene + gentle animated bits ---------- */
 
+/* Draw an image scaled to a target width, anchored by its bottom edge.
+   Used for the scenery strips; returns the drawn height. */
+function drawStrip(img, x, bottomY, width, alpha = 1) {
+  if (!img.complete || !img.naturalWidth) return 0;
+  const h = width * (img.naturalHeight / img.naturalWidth);
+  ctx.globalAlpha = alpha;
+  ctx.drawImage(img, x, bottomY - h, width, h);
+  ctx.globalAlpha = 1;
+  return h;
+}
+
 function drawBackground() {
   if (!bgCanvas) renderGarden();
   ctx.drawImage(bgCanvas, 0, 0, W, H);
+
+  // The moon, high in the top-left corner (the sound button owns the
+  // top-right). Perfectly still — scenery, not a toy.
+  const moon = IMAGES.moon;
+  if (moon.complete && moon.naturalWidth) {
+    const mw = Math.min(W, H) * 0.24;
+    ctx.drawImage(moon, W * 0.04, H * 0.03, mw, mw * (moon.naturalHeight / moon.naturalWidth));
+  }
+  // Clouds: one still, dim cluster tucked high in the sky. Static and
+  // unglowing on purpose — nothing a child could mistake for a firefly
+  // or feel pulled to tap.
+  const clouds = IMAGES.clouds;
+  if (clouds.complete && clouds.naturalWidth) {
+    // upper-middle sky: clear of the moon (top-left) and the sound
+    // button (top-right) in both orientations
+    const cw = W * 0.24;
+    ctx.globalAlpha = 0.5;
+    ctx.drawImage(clouds, W * 0.42, H * 0.07, cw, cw * (clouds.naturalHeight / clouds.naturalWidth));
+    ctx.globalAlpha = 1;
+  }
+
+  // distant pale bushes — bottom edge tucked behind the front foliage so
+  // only the bumpy silhouette shows above it
+  drawStrip(IMAGES.bushesFar, 0, H * 0.95, W, 0.85);
+
   // faint twinkling stars (slow, dim — never a light show)
   for (const s of stars) {
     const a = 0.15 + 0.2 * (0.5 + 0.5 * Math.sin(time * s.f + s.p));
     ctx.fillStyle = `rgba(255,244,224,${a})`;
     ctx.beginPath(); ctx.arc(s.x * W, s.y * H, s.r, 0, Math.PI * 2); ctx.fill();
   }
+  // the rich foreground foliage across the bottom, with the flower
+  // cluster tucked into each side
+  const fh = drawStrip(IMAGES.foliageFront, 0, H + 8, W);
+  const fl = IMAGES.flowers;
+  if (fl.complete && fl.naturalWidth && fh) {
+    const fw = W * 0.09;
+    ctx.drawImage(fl, W * 0.055, H - fh * 0.62, fw, fw * (fl.naturalHeight / fl.naturalWidth));
+    ctx.drawImage(fl, W * 0.86, H - fh * 0.5, fw * 0.8, fw * 0.8 * (fl.naturalHeight / fl.naturalWidth));
+  }
+
   // glow motes breathing in the bushes
   ctx.save();
   ctx.globalCompositeOperation = 'lighter';
