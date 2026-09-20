@@ -288,6 +288,23 @@ constraints, and a README that maps the architecture at a glance.
 - Verified the restructured game behaves identically (console clean, catch → jar →
   lights, state dump correct).
 
+## Session 11 — independent review lands + packaging (~15m)
+
+Astra (Codex) completed the review against REVIEW-BRIEF.md. Results (full detail in
+REVIEW-REPORT.md): **4 bugs fixed** — a P1 where extra arrivals could overfill the jar
+and restart the celebration repeatedly; audio failures that could interrupt input or
+the frame loop; mute leaving already-scheduled notes audible; a resize listener that
+registered before dependent modules loaded. **3 dead-code removals**, each verified
+individually. **6 items correctly flagged instead of changed** because they'd alter
+feel (spawn-rate frame dependence, speed-cap semantics, mid-resize travel rebasing,
+naming improvements, config centralization inventory). It also left a 15-test
+regression suite (`node --test tests/review.cjs`) with zero dependencies — which I
+re-ran independently: 15/15.
+
+Delivery decision: zip instead of hosting (the brief explicitly allows it; no
+hosting spend). Final artifacts: `firefly-jar-GAME.zip` (open index.html and play)
+and `firefly-jar-SOURCE.zip` (full project: code, tests, all write-ups).
+
 ## Open items
 - Playtest v1 on tablet → choose the added mechanic (lullaby jar vs goodnight release vs
   something the playtest reveals).
