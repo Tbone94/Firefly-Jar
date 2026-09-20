@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Firefly Jar</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<!-- ============================================================
+     Firefly Jar — a gentle one-screen game for ages 4–7.
+     Tap fireflies; they float into the jar; at 10 the jar
+     celebrates and the night begins again.
+
+     Plain JS + canvas, no build step. Scripts load in dependency
+     order and share one global scope (see README.md for the map):
+
+       config.js     all tuning constants and palette values
+       core.js       canvas, resize, shared helpers (glow, easing, RNG)
+       assets.js     sprite loading
+       audio.js      WebAudio pentatonic chimes
+       sparkles.js   celebration + tap-twinkle particles
+       garden.js     the night-garden background
+       jar.js        jar state, lights, glow, celebration
+       fireflies.js  firefly spawning, flight, expressions, idle mode
+       ui.js         sound toggle + pointer input
+       main.js       the game loop (last: boots everything)
+
+     Design contract: ../STYLE-GUIDE.md. Build history: ../PROCESS-LOG.md.
+     ============================================================ -->
+<script src="js/config.js"></script>
+<script src="js/core.js"></script>
+<script src="js/assets.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/sparkles.js"></script>
+<script src="js/garden.js"></script>
+<script src="js/jar.js"></script>
+<script src="js/fireflies.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

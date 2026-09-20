@@ -1,0 +1,15 @@
+/* Firefly Jar — page chrome.
+   Night sky is the only allowed background (STYLE-GUIDE §2).
+   The canvas owns the whole viewport and every touch. */
+
+html, body {
+  margin: 0; padding: 0;
+  background: #2B3A67;
+  overflow: hidden;
+  height: 100%;
+  touch-action: none;          /* the canvas owns every touch */
+  -webkit-user-select: none; user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+canvas { display: block; }
