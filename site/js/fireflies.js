@@ -72,8 +72,8 @@ function spawnFirefly(edge = false) {
     // "from the distance": grows from small to full size as it arrives
     appr: entry === 'far' ? 0 : 1,
     spd: 12 + Math.random() * 14,              // px/s — some amble, some float
-    turnP: Math.random() * Math.PI * 2,        // slow steering wave
-    turnF: 0.05 + Math.random() * 0.07,
+    turnCur: 0, turnTarget: 0, segT: 0,        // designed flight segments
+    mirrorNext: false, lastSweep: Math.PI,     // (see nextFlightSegment)
     loopT: 0,                                  // >0 while doing a loop
     nextLoopIn: 8 + Math.random() * 16,        // s until this one's next loop
     pulse: Math.random() * Math.PI * 2,        // glow phase offset
@@ -103,10 +103,52 @@ function updateIdle(dt) {
     const candidates = fireflies.filter(f => f.state === 'drift' && f.appr >= 1);
     if (candidates.length) {
       beginSleep(candidates[Math.floor(Math.random() * candidates.length)]);
-      nextSleepAt = idleTime + 5 + Math.random() * 4;
+      // each doze RESETS the clock — the next firefly takes a while to get
+      // sleepy too, so the demonstration stays unhurried
+      nextSleepAt = idleTime + IDLE_REPEAT + Math.random() * 6;
     } else {
       nextSleepAt = idleTime + 2;   // nobody free yet; check again soon
     }
+  }
+}
+
+/* ---------- designed flight segments ----------
+   Ambient flight is a chain of constant-curvature pieces — a constant turn
+   rate traces a perfect circle arc, which is exactly what a 4–7-year-old's
+   eye can follow and predict. The menu: gentle glides between figures, big
+   rounded arcs, full U-turns, and occasional S-curves (an arc then its
+   mirror). Turn rate eases between segments so joins never kink. */
+
+function nextFlightSegment(f) {
+  if (f.mirrorNext) {              // finish an S-curve: same arc, mirrored
+    f.mirrorNext = false;
+    f.turnTarget = -f.turnTarget;
+    f.segT = f.lastSweep / Math.abs(f.turnTarget || 0.3);
+    return;
+  }
+  // Every figure is followed by a straight glide, so shapes read one at a
+  // time instead of piling into a scribble.
+  if (f.lastWasTurn) {
+    f.lastWasTurn = false;
+    f.turnTarget = (Math.random() - 0.5) * 0.06;
+    f.segT = 3 + Math.random() * 3;
+    return;
+  }
+  const dir = Math.random() < 0.5 ? 1 : -1;
+  const r = Math.random();
+  f.lastWasTurn = true;
+  if (r < 0.45) {                            // big rounded arc (90–150°)
+    const rate = 0.16 + Math.random() * 0.12;   // low rate = wide circle
+    const sweep = Math.PI * (0.5 + Math.random() * 0.33);
+    f.turnTarget = dir * rate; f.segT = sweep / rate; f.lastSweep = sweep;
+  } else if (r < 0.8) {                      // U-turn (a full half circle)
+    const rate = 0.2 + Math.random() * 0.12;
+    f.turnTarget = dir * rate; f.segT = Math.PI / rate; f.lastSweep = Math.PI;
+  } else {                                   // S-curve: this arc, then mirrored
+    const rate = 0.18 + Math.random() * 0.1;
+    const sweep = Math.PI * (0.45 + Math.random() * 0.2);
+    f.turnTarget = dir * rate; f.segT = sweep / rate; f.lastSweep = sweep;
+    f.mirrorNext = true;
   }
 }
 
@@ -187,8 +229,13 @@ function updateFireflies(dt) {
     if (f.state === 'drift' || f.state === 'sleepy') {
       // sleepy fireflies glide slower and slowly sink while dozing off
       const calm = 1 - 0.75 * f.sleepy;
-      f.turnP += f.turnF * dt * Math.PI * 2;
-      let turn = Math.sin(f.turnP) * 0.3;      // rad/s — long winding arcs
+      // follow the designed path: advance the segment chain, easing the
+      // real turn rate toward the segment's curvature (no kinks at joins)
+      f.segT -= dt;
+      if (f.segT <= 0) nextFlightSegment(f);
+      const turnStep = 0.6 * dt;
+      f.turnCur += Math.max(-turnStep, Math.min(turnStep, f.turnTarget - f.turnCur));
+      let turn = f.turnCur;
       let spd = f.spd;
 
       // occasional playful loop-de-loop mid-flight (awake, on-screen only)

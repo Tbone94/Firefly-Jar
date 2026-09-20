@@ -43,6 +43,8 @@ const JAR_CAPACITY   = 10;    // catches per round (assignment spec)
 const AMBIENT_COUNT  = 5;     // fireflies drifting at once
 const HIT_RADIUS     = 110;   // generous child-finger hit circle (CSS px)
 const IDLE_START     = 9;     // seconds untouched before the first sleepy doze
+const IDLE_REPEAT    = 10;    // base wait before the NEXT doze — each sleepy
+                              // firefly resets the clock (+ up to 6 s random)
 const HALF_PULSE_DUR = 1.8;   // halfway-milestone glow swell (s); slow, no flash
 
 /* ---------- sprite metrics (measured, in source-PNG pixels) ---------- */

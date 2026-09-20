@@ -55,8 +55,11 @@ If a new asset or effect doesn't match a rule here, it doesn't ship.
 
 ## 5. Motion rules
 
-- All movement is **eased, drifting, floaty**. Firefly wander = layered sine noise;
-  no straight lines, no constant velocities, no sudden direction changes.
+- All movement is **eased, drifting, floaty**. Ambient flight follows **designed
+  constant-curvature segments** — gentle glides, big rounded arcs, U-turns,
+  occasional S-curves and loop-de-loops. Constant turn = perfect circle pieces:
+  paths a young child's eye can track and predict. Turn rate eases between
+  segments; no jitter, no sudden direction changes.
 - Speed caps: ambient drift ≤ ~40 px/s (on a 1280-wide field); travel-to-jar ≤ ~300 px/s
   with ease-in-out, arcing path (never a beeline).
 - Response to touch is **immediate but soft**: the tapped firefly reacts within 1 frame
