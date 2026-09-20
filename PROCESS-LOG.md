@@ -324,6 +324,25 @@ vocabulary (first attempt bunched figures into a scribble → fixed with the man
 glide separator and wider circles); all 15 regression tests still pass. Live site
 updated.
 
+## Session 13 — custom scenery art (~30m)
+
+I generated my own scenery set with Gemini (moon, clouds, flower cluster, rich
+foreground foliage, distant bushes) and we mocked it up in an isolated copy before
+touching the real game.
+
+**Where the AI-generated art got it wrong:** Gemini exported "transparent" images as
+JPEGs with the checkerboard *baked into the pixels*. Crisp-edged foliage could be
+rescued by masking, but the moon's and clouds' soft glow halos had blended with the
+checker — unrecoverable. Fix: regenerated those two on a solid navy background
+(solid colors key out cleanly; checkerboards never do) and difference-keyed them.
+Foliage strips were night-tinted in preprocessing to sit in the palette.
+
+**Design guards:** moon and clouds are static, dim, and unglowing so nothing in the
+scenery reads as tappable; first placement put the clouds under the sound button
+(exactly that confusion) — caught in a portrait screenshot and moved to clear sky.
+Procedural bushes/fronds retired in favor of the custom strips; grass mound and
+treeline kept as the base. All 15 regression tests still pass.
+
 ## Open items
 - Playtest v1 on tablet → choose the added mechanic (lullaby jar vs goodnight release vs
   something the playtest reveals).

@@ -106,6 +106,7 @@ If a new asset or effect doesn't match a rule here, it doesn't ship.
 | `firefly_jar_empty.png` | The jar, center-bottom on grass. Glow + caught fireflies rendered behind/inside it in code |
 | `celebration_sparkle_burst.png` | **Shape/color reference only** (dark bg baked in). Celebration = code particles: rounded 4-point stars, 5-point stars, dots in `#FFF4E0` / `#F4A6B7` / `#FFD166` |
 | `charsheet_firefly_primary.png` | Canon for poses, expressions, materials. Expressions available: happy, surprised, sleepy |
+| `assets/custom/*` (moon, clouds, flowers, foliage_front, bushes_far) | Owner-generated scenery per §9's prompt rules (solid-color backgrounds keyed out; foliage night-tinted into the palette). Moon and clouds are static, dim, and unglowing — scenery must never read as tappable |
 | `concept_container.png` | Canon for scene layout, jar fill states, glow treatment |
 
 ## 9. Generating any NEW asset (AI pipeline rule)

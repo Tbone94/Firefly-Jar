@@ -13,6 +13,13 @@ const SPRITES = [
   ['pink',   'assets/firefly_pink.png'],
   ['teal',   'assets/firefly_green_teal.png'],
   ['jar',    'assets/firefly_jar_empty.png'],
+  // custom scenery, generated against the style-guide references
+  // (backgrounds keyed out; foliage night-tinted to sit in the palette)
+  ['moon',        'assets/custom/moon.png'],
+  ['clouds',      'assets/custom/clouds.png'],
+  ['flowers',     'assets/custom/flowers.png'],
+  ['foliageFront','assets/custom/foliage_front.png'],
+  ['bushesFar',   'assets/custom/bushes_far.png'],
 ];
 
 for (const [key, src] of SPRITES) {
