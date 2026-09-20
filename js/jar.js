@@ -30,7 +30,11 @@ function layoutScene() {
 
 /* A firefly has reached the jar mouth (tapped or sleepy-drifted). */
 function arriveAtJar(f) {
+  if (f.done) return;
   f.done = true;
+  // Travelers may still settle during the celebration; the full jar must
+  // stay at ten lights and its one celebration must finish on schedule.
+  if (celebrating || caughtCount >= JAR_CAPACITY) return;
   caughtCount++;
   // a sleepy firefly settling in gets its own extra-soft note
   if (f.sleepy > 0) chime(PENTA[2], 0, 0.07, 1.8);
@@ -97,8 +101,8 @@ function updateCelebration(dt) {
 function drawJar(dt) {
   // brightness eases toward target — never jumps (§4)
   jar.glow += (jar.targetGlow - jar.glow) * Math.min(1, dt * 2.5);
-  // Sub-linear ramp so early catches don't max the glow out — every firefly
-  // from 1 to 10 still adds a visible step (playtest: "it peaks too early").
+  // Keep early catches dim so later arrivals still add a visible step
+  // (playtest: "it peaks too early"). The power curve reserves light for later.
   const g = Math.pow(jar.glow, 1.5);
   // Celebration swell is gentle and slow — no strobing, sensory-safe.
   let burst = celebrating ? (0.5 + 0.5 * Math.sin(time * 1.2)) * 0.15 : 0;

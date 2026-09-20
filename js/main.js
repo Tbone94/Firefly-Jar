@@ -35,5 +35,7 @@ function frame(now) {
   requestAnimationFrame(frame);
 }
 
+// Register only after jar.js and garden.js have initialized their state.
+window.addEventListener('resize', resize);
 resize();
 requestAnimationFrame(frame);
