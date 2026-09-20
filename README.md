@@ -1,0 +1,78 @@
+# Firefly Jar
+
+A gentle one-screen browser game for children aged 4–7, built for the nurture
+take-home assignment. At night in a garden, fireflies drift around; the child
+taps them to guide them into a glass jar. At 10 fireflies the jar glows and a
+small celebration plays, then the night begins again. No fail states, no
+reading, no timers.
+
+Plain JavaScript + canvas. **No build step, no dependencies** — the `site/`
+folder is the complete, deployable game.
+
+## Run it
+
+- Open `site/index.html` in a browser, or serve the folder:
+
+  ```
+  python3 -m http.server 8000 --directory site
+  ```
+
+- Deploy: drag a zip of `site/` onto Netlify Drop (or any static host).
+
+Works with touch on tablets and mouse on desktop (pointer events; identical
+behavior). Sound is synthesized in-code — no audio files — and starts on the
+first touch (browser autoplay rules).
+
+## Project map
+
+```
+site/                  the deployable game (this folder IS the source)
+  index.html           markup + script load order
+  css/style.css        page chrome (fullscreen canvas, night background)
+  js/
+    config.js          ALL tuning constants, palette, sprite metrics — start here
+    core.js            canvas, resize, shared helpers (glow cache, easing, RNG)
+    assets.js          sprite loading
+    audio.js           WebAudio pentatonic chimes
+    sparkles.js        celebration + tap-twinkle particles
+    garden.js          procedural night-garden background (prerendered)
+    jar.js             jar layout, lights inside, lantern glow, round lifecycle
+    fireflies.js       spawning, flight model, expressions, idle attract mode
+    ui.js              sound toggle + pointer input
+    main.js            game loop (loads last, boots everything)
+  assets/              supplied art (fireflies ×3, jar)
+assets/                full supplied reference set (charsheet, concept, sparkle)
+STYLE-GUIDE.md         the design contract every visual/motion/audio choice obeys
+PROCESS-LOG.md         honest build log: prompts, AI mistakes, corrections, time
+REVIEW-BRIEF.md        scope + rules for the code review pass
+```
+
+Scripts are classic (non-module) and share one global scope; `index.html`
+loads them in dependency order, and each file's header comment says what state
+it owns. `js/config.js` is the tuning surface — game-feel changes start there.
+
+## How it works (60-second tour)
+
+- **Flight** (`fireflies.js`): heading-based steering — each firefly has a
+  direction that turns smoothly (no jitter), with edge steering, a keep-out
+  bubble around the jar, gentle pairwise separation, and occasional
+  loop-de-loops. Three spawn entries: side drift, top drop-in, and a
+  "from the distance" approach that grows from small to full size.
+- **Catching**: tap → surprised "oh!" face → eased bezier arc into the jar
+  (sometimes with a loop or flutter flourish) → a soft pentatonic chime → the
+  firefly becomes a countable colored light inside the glass.
+- **Jar** (`jar.js`): brightness ramps sub-linearly across all 10 catches,
+  capped so the full jar is a cozy lantern, never a floodlight
+  (neurodivergent-friendly). One gentle pulse marks the halfway point.
+- **Idle attract mode**: untouched for ~9 s, fireflies doze off one at a time
+  (charsheet's sleepy face) and drift into the jar — demonstrating the game to
+  a watching child without a single word of instruction.
+- **Expressions**: sleepy and surprised faces are code overlays anchored to
+  pixel-measured landmarks on the supplied sprites (`config.js`).
+
+## Design contract
+
+`STYLE-GUIDE.md` is normative: exact palette roles, shape language, glow and
+motion caps, the pre-reader UI contract (no text anywhere, ≥110 px hit
+circles, every touch gets an answer), sensory-safety rules, and the prompt
+template for generating any new art against the supplied references.
