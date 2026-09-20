@@ -25,15 +25,22 @@ zero-new-input flourishes; I matched that scale.
 
 ## What I'd build next if this became a real game
 
-1. **Lullaby jar** — each caught firefly adds one pentatonic note; the full-jar
-   celebration replays the child's own little melody. (The chime scaffolding is
-   already in.)
-2. **Gentle collection goals, shown pictorially** — the jar "wishes" for three
-   pink fireflies via a small picture, never text or numbers.
-3. **A goodnight release ritual** — at bedtime the jar tips open and the
-   fireflies fly home; designed with parents as a wind-down cue.
-4. **Sensory settings for grown-ups** — glow intensity, motion, and sound
-   sliders, because "calm" isn't one-size-fits-all for neurodivergent kids.
+The three color variants are the seed. Today color is decoration; next it
+becomes meaning:
+
+1. **Color personalities** — each color flies differently within the same calm
+   caps: yellow are steady drifters, pink are slow dreamy loopers, teal are the
+   playful ones who zig and peek. Kids start recognizing *who* they're catching.
+2. **Color-matched jars** — two or three small jars, each glowing softly in the
+   color it wishes for (shown by light, never words). Any firefly in any jar
+   still counts — a match just earns an extra sparkle — so sorting stays
+   no-fail while quietly practicing a core preschool skill.
+3. **Peek-a-boo fireflies** — once in a while a jarred firefly floats up to the
+   rim and peeks out; a gentle tap pats it back in with a giggle. Framed
+   strictly as play, never escape: the count never goes down, nothing is ever
+   lost. It turns the full jar into a live toy instead of a trophy.
+4. **Lullaby jar** — each catch adds one note; the celebration replays the
+   child's own little melody (the chime system already supports it).
 
 ## What I deliberately cut
 
