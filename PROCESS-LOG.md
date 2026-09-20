@@ -1,8 +1,61 @@
 # Firefly Jar — Process Log
 
-Raw and in order. Tools: Claude (Claude Code) for design research, style-guide writing,
-all game code, and in-browser verification; the supplied reference PNGs for art.
-Sound is synthesized in-code (WebAudio), no audio tools yet.
+Raw and in order. The sessions below are the honest build history; this header
+summarizes the three things the brief asks for directly.
+
+## Tools used, and why
+
+- **Claude (Claude Code)** — the primary tool for everything: design research, the
+  style guide, all game code, and (unusually) *verification*: it drove the game in a
+  browser, took screenshots, pixel-sampled the canvas to prove rendering claims, and
+  ran simulated 1–2 minute flights to tune speeds/loops from measurements instead of
+  guesses. Working conversationally meant every feel change was a playtest note, not a
+  spec rewrite.
+- **Python / Pillow** — measured the supplied sprites (eye/mouth landmark coordinates,
+  body colors) so the sleepy/surprised expression overlays anchor to real pixels, and
+  cropped/enlarged the concept sheet's garden panel to art-direct the background from
+  the actual reference.
+- **WebAudio (synthesized sound, no files)** — pentatonic chimes generated in code.
+  Why: zero asset pipeline, always-consonant notes, and tuning dynamics is a
+  one-line change.
+- **Astra (Codex)** — independent code review pass (bugs, structure, dead code) against
+  a written brief (REVIEW-BRIEF.md), so the reviewer wasn't the author.
+- **No image-generation tools** — a deliberate cut. The supplied art covered every
+  gameplay need; generated additions risked style drift for zero gameplay value. (The
+  style guide still carries a reference-anchored prompt template for future art.)
+
+## Key prompts, verbatim
+
+My direction to the AI, unedited (these steered the whole build):
+
+- "do research first on what kind of mechanic would be most benefical to this this
+  remmebr to keep it small they want to see my design judggemnt not scale"
+- "is this a design mechanic that a child will pick up on though?"
+- "i just feel like this is to big of a mechanic choice that impacts the overal game
+  the examples they gave were very small"
+- "we need to design strict guidlines for consistancy in design and style. using the
+  character refernces we were given an establish a theme guidline"
+- "make sure this is neurivegent/autistic child friedly too"
+- "when untouched for a while the firflies should show the sleepy face, and slowly
+  drift down into the jar… shows the kid what they are supposed to do"
+- "the surprise face should be used when they are tapped, with enough time to see the
+  face after you press it with your finger"
+- "more of a soft, flowing glid/flutter around the screen and cn use more space on
+  their flight patterns"
+- "flight paths should be more intentional, dont go too close to the jar… some flight
+  paths can have the flirlfies do a loop"
+- "the review also needs to flag desd code and safely remove it without affecting
+  anything functinal"
+
+(The AI's own working prompts to sub-tools — pixel scans, flight simulations, the
+review scope — are recorded in the sessions below and in REVIEW-BRIEF.md.)
+
+## Rough time split (~3h30m of the 4h cap)
+
+- ~25% — design research, mechanic debate, style guide (before any code)
+- ~45% — build + fix cycles (core loop, garden, jar, expressions, idle mode)
+- ~15% — playtest-driven feel tuning (glow, flight, spawns, variety)
+- ~15% — handoff: restructure to modules, README, review brief, this write-up
 
 ## Session 1 — assignment intake → playable v1 core loop (~1h15m)
 
@@ -207,6 +260,33 @@ scale) in the open sky and grows smoothly to full size over ~4.5 s, spawning cle
 the jar bubble and other fireflies. Approaching fireflies are still tappable (and keep
 growing mid-flight if caught early); the idle sleepy-picker ignores them until they've
 fully arrived.
+
+## Session 10 — handoff restructure + review prep (~25m)
+
+**My ask:** a code review by Astra (Codex) — bugs/issues, structure/legibility for a
+human, and dead code flagged + safely removed. Research the industry standard for code
+organization for handing off a project.
+
+**Research:** modern JS handoff standards converge on separation of concerns into
+modules, a predictable folder layout, consistent naming, comments that explain
+constraints, and a README that maps the architecture at a glance.
+
+**Changes:**
+- Renamed `build/` → `site/` (there is no build step — the folder is the source, and
+  "build" tells a reviewer "generated, don't edit").
+- Split the single ~1,000-line file into 10 per-system modules (`config` / `core` /
+  `assets` / `audio` / `sparkles` / `garden` / `jar` / `fireflies` / `ui` / `main`),
+  each with a header stating its purpose and what state it owns; classic scripts in
+  dependency order, no tooling added on purpose (open-and-run + Netlify Drop stay).
+- All tuning constants and palette values consolidated into `js/config.js`.
+- `README.md` with run instructions, project map, and a 60-second systems tour.
+- `REVIEW-BRIEF.md` scoping Astra's three passes: bugs (with specific suspect areas),
+  structure judged as a stranger, and dead-code flag-then-remove-safely rules.
+- First dead code removed during the split: the `loaded` counter in `assets.js`
+  (incremented, never read).
+- Project put under git (initial commit) so Astra's review lands as a diff.
+- Verified the restructured game behaves identically (console clean, catch → jar →
+  lights, state dump correct).
 
 ## Open items
 - Playtest v1 on tablet → choose the added mechanic (lullaby jar vs goodnight release vs
