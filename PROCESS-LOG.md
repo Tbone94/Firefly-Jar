@@ -343,6 +343,16 @@ scenery reads as tappable; first placement put the clouds under the sound button
 Procedural bushes/fronds retired in favor of the custom strips; grass mound and
 treeline kept as the base. All 15 regression tests still pass.
 
+## Session 14 — polish trio (~10m)
+
+Clouds scattered: the trio image split into three sprites placed around the sky at
+varied sizes/depths (still static, dim, unglowing). Catch sound softened for parents:
+pure sine instead of triangle (no buzzy harmonics — "rounded"), slower 50 ms bloom
+attack, lower volume with slight random variation per tap so rapid tapping never
+sounds mechanical. And a keep-out bubble around the sound button so fireflies never
+drift where a tap could be ambiguous — verified by simulation (closest approach 152 px
+against a 110 px tap radius). Tests 15/15.
+
 ## Open items
 - Playtest v1 on tablet → choose the added mechanic (lullaby jar vs goodnight release vs
   something the playtest reveals).

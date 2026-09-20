@@ -263,13 +263,22 @@ function updateFireflies(dt) {
       else if (f.x > W - 60) steer(Math.PI);
       if (f.y < 70) steer(Math.PI / 2);
       else if (f.y > H * 0.74) steer(-Math.PI / 2);
-      // …and keep a respectful bubble around the jar (its space, not theirs)
+      // …keep a respectful bubble around the jar (its space, not theirs)…
       const jdx = f.x - jar.x, jdy = f.y - jar.y;
       const jd = Math.hypot(jdx, jdy), KEEP = jar.h * 1.05;
       if (jd < KEEP && f.state === 'drift') {
         steer(Math.atan2(jdy, jdx));
         const push = (1 - jd / KEEP) * 30 * dt;
         f.x += (jdx / (jd || 1)) * push; f.y += (jdy / (jd || 1)) * push;
+      }
+      // …and clear of the sound button's corner, so a child reaching for
+      // a firefly never accidentally hits the toggle (or vice versa)
+      const bdx = f.x - (W - 64), bdy = f.y - 64;
+      const bd = Math.hypot(bdx, bdy), BKEEP = 175;
+      if (bd < BKEEP && f.state === 'drift') {
+        steer(Math.atan2(bdy, bdx));
+        const push = (1 - bd / BKEEP) * 26 * dt;
+        f.x += (bdx / (bd || 1)) * push; f.y += (bdy / (bd || 1)) * push;
       }
 
       f.th += turn * dt * calm;

@@ -41,17 +41,19 @@ function toggleSound() {
   if (audioOutput) audioOutput.gain.value = soundOn ? 1 : 0;
 }
 
-/* One soft music-box note: triangle wave, quick attack, long gentle decay. */
+/* One soft note: pure sine (no buzzy harmonics — "rounded"), gentle
+   bloom of an attack, long decay. Tuned to be parent-proof: quiet,
+   warm, and never sharp even under rapid tapping. */
 function chime(freq, when = 0, vol = 0.16, dur = 1.6) {
   if (!audioCtx || !audioOutput || !soundOn || audioCtx.state === 'closed') return;
   try {
     const t = audioCtx.currentTime + when;
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
-    osc.type = 'triangle';
+    osc.type = 'sine';
     osc.frequency.value = freq;
     gain.gain.setValueAtTime(0, t);
-    gain.gain.linearRampToValueAtTime(vol, t + 0.02);
+    gain.gain.linearRampToValueAtTime(vol, t + 0.05);   // soft bloom, no ping
     gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
     osc.connect(gain).connect(audioOutput);
     osc.start(t); osc.stop(t + dur + 0.1);
@@ -61,7 +63,12 @@ function chime(freq, when = 0, vol = 0.16, dur = 1.6) {
   }
 }
 
-function catchSound()  { chime(PENTA[2]); chime(PENTA[4], 0.09, 0.10); }
+function catchSound() {
+  // a touch of natural variation so repeated taps never sound mechanical
+  const v = 0.09 + Math.random() * 0.025;
+  chime(PENTA[2], 0, v, 1.8);
+  chime(PENTA[4], 0.10, v * 0.6, 1.8);
+}
 
 function celebrateSound() {
   [0, 1, 2, 3, 4, 5].forEach(i => chime(PENTA[i], i * 0.16, 0.14, 2.0));
