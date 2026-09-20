@@ -305,6 +305,25 @@ Delivery decision: zip instead of hosting (the brief explicitly allows it; no
 hosting spend). Final artifacts: `firefly-jar-GAME.zip` (open index.html and play)
 and `firefly-jar-SOURCE.zip` (full project: code, tests, all write-ups).
 
+## Session 12 — readable flight figures + unhurried idle (~20m)
+
+**My feedback:** wandering should follow actual designed paths — "rounded, U-shape,
+sometimes loops etc but easy to track, smooth, designed for 4–7yr olds" — and the next
+firefly to fall asleep should take longer, like the timer resets.
+
+**Changes:** ambient flight became a chain of constant-curvature segments (a constant
+turn rate traces a perfect circle piece — precisely the kind of path a young child's
+eye can follow and predict): wide arcs, full U-turns, occasional S-curves, with a
+mandatory straight glide between figures so shapes read one at a time instead of piling
+into a scribble; turn rate eases at every join so paths can't kink. Idle mode: each doze
+now resets the clock — the next firefly waits a fresh 10–16 s (was 5–9 s).
+
+**Verification:** kink check — max turn-rate change per frame measured at exactly the
+easing limit (mathematically smooth); 70-second trail renders showed the figure
+vocabulary (first attempt bunched figures into a scribble → fixed with the mandatory
+glide separator and wider circles); all 15 regression tests still pass. Live site
+updated.
+
 ## Open items
 - Playtest v1 on tablet → choose the added mechanic (lullaby jar vs goodnight release vs
   something the playtest reveals).
