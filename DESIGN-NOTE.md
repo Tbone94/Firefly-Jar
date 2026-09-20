@@ -25,22 +25,31 @@ zero-new-input flourishes; I matched that scale.
 
 ## What I'd build next if this became a real game
 
-The three color variants are the seed. Today color is decoration; next it
-becomes meaning:
+The catching loop is the fun; the roadmap turns it into teaching. Every
+addition below has one named learning goal, taught the same way the game
+already teaches everything — through play and demonstration, never words or
+drills. The three color variants are the seed: today color is decoration,
+next it becomes curriculum.
 
-1. **Color personalities** — each color flies differently within the same calm
-   caps: yellow are steady drifters, pink are slow dreamy loopers, teal are the
-   playful ones who zig and peek. Kids start recognizing *who* they're catching.
-2. **Color-matched jars** — two or three small jars, each glowing softly in the
-   color it wishes for (shown by light, never words). Any firefly in any jar
-   still counts — a match just earns an extra sparkle — so sorting stays
-   no-fail while quietly practicing a core preschool skill.
-3. **Peek-a-boo fireflies** — once in a while a jarred firefly floats up to the
-   rim and peeks out; a gentle tap pats it back in with a giggle. Framed
-   strictly as play, never escape: the count never goes down, nothing is ever
-   lost. It turns the full jar into a live toy instead of a trophy.
-4. **Lullaby jar** — each catch adds one note; the celebration replays the
-   child's own little melody (the chime system already supports it).
+1. **Color personalities** — yellow are steady drifters, pink are slow dreamy
+   loopers, teal are playful zig-zaggers (all within the calm caps).
+   *Learning goal: observation and prediction* — the child learns to watch
+   first, notice patterns in behavior, and anticipate where a friend will go.
+2. **Color-matched jars** — two or three jars, each glowing softly in the
+   color it wishes for. Any firefly in any jar still counts; a match earns an
+   extra sparkle. *Learning goal: sorting and classification* — matching by
+   attribute is core preschool math, practiced here with zero fail state.
+3. **Peek-a-boo fireflies** — a jarred firefly sometimes floats to the rim and
+   peeks out; a gentle tap pats it back in with a giggle. Never loss — the
+   count can't go down. *Learning goal: empathy and caretaking* — noticing a
+   friend who needs attention and responding gently, the skill at the center
+   of nurture's own framework.
+4. **Lullaby jar** — each catch adds one pentatonic note; the celebration
+   replays the child's own little melody. *Learning goal: sequencing and
+   auditory memory* — early musical patterning, built from the existing chimes.
+
+(And already in the shipped game: the ten countable lights are quiet counting
+practice, one physical light per catch.)
 
 ## What I deliberately cut
 
