@@ -26,10 +26,13 @@ zero-new-input flourishes; I matched that scale.
 ## What I'd build next if this became a real game
 
 The catching loop is the fun; the roadmap turns it into teaching. Every
-addition below has one named learning goal, taught the same way the game
-already teaches everything — through play and demonstration, never words or
-drills. The three color variants are the seed: today color is decoration,
-next it becomes curriculum.
+addition below has one named learning goal anchored to an established 4–7
+milestone (color sorting and counting to ten at ~4–5; prediction, pattern
+memory, and empathy-in-play developing across 4–7) — and each is taught the
+way the game already teaches everything: through play and demonstration,
+never words or drills. Every mechanic plays fine with zero comprehension, so
+the wide age range has a floor at 4 and a ceiling at 7. The three color
+variants are the seed: today color is decoration, next it becomes curriculum.
 
 1. **Color personalities** — yellow are steady drifters, pink are slow dreamy
    loopers, teal are playful zig-zaggers (all within the calm caps).
