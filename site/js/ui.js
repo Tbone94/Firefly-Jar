@@ -37,7 +37,7 @@ canvas.addEventListener('pointerdown', (e) => {
   const x = e.clientX, y = e.clientY;
 
   if (Math.hypot(x - soundBtn.x, y - soundBtn.y) < soundBtn.r) {
-    soundOn = !soundOn;
+    toggleSound();
     if (soundOn) chime(PENTA[4], 0, 0.1, 0.8);
     return;
   }

@@ -21,7 +21,6 @@ function resize() {
   layoutScene();               // jar.js — reposition the jar
   bgCanvas = null;             // garden.js — re-render at the new size
 }
-window.addEventListener('resize', resize);
 
 /* Standard smooth ease for all travel animation (STYLE-GUIDE §5). */
 function easeInOut(t) { return t < 0.5 ? 2*t*t : 1 - Math.pow(-2*t + 2, 2) / 2; }

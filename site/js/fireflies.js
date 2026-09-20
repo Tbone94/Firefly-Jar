@@ -82,10 +82,8 @@ function spawnFirefly(edge = false) {
     size: 84 + Math.random() * 22,             // display height
     flip: Math.random() < 0.5,
     state: 'drift',                            // see state machine above
-    t: 0,                                      // travel progress (0..1)
     squash: 0,                                 // tap-response squash timer
     sleepy: 0,                                 // 0 awake → 1 eyes closed
-    sleepT: 0,                                 // dozing-off timer
     surprise: 0,                               // "oh!" face timer after a tap
   });
 }
@@ -297,7 +295,7 @@ function drawFireflies() {
     ctx.translate(f.x, f.y + hover);
     ctx.rotate(sway);
     if (f.flip) ctx.scale(-1, 1);
-    ctx.scale(squash, 2 - squash > 1 ? 1/squash : 1);
+    ctx.scale(squash, 1);
     const w = size * (SPRITE_BOX.sw / SPRITE_BOX.sh);
     ctx.drawImage(img, SPRITE_BOX.sx, SPRITE_BOX.sy, SPRITE_BOX.sw, SPRITE_BOX.sh,
                   -w/2, -size/2, w, size);
