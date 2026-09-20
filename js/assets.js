@@ -16,7 +16,9 @@ const SPRITES = [
   // custom scenery, generated against the style-guide references
   // (backgrounds keyed out; foliage night-tinted to sit in the palette)
   ['moon',        'assets/custom/moon.png'],
-  ['clouds',      'assets/custom/clouds.png'],
+  ['cloudA',      'assets/custom/cloud_a.png'],
+  ['cloudB',      'assets/custom/cloud_b.png'],
+  ['cloudC',      'assets/custom/cloud_c.png'],
   ['flowers',     'assets/custom/flowers.png'],
   ['foliageFront','assets/custom/foliage_front.png'],
   ['bushesFar',   'assets/custom/bushes_far.png'],
