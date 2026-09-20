@@ -35,16 +35,19 @@ site/                  the deployable game (this folder IS the source)
     assets.js          sprite loading
     audio.js           WebAudio pentatonic chimes
     sparkles.js        celebration + tap-twinkle particles
-    garden.js          procedural night-garden background (prerendered)
+    garden.js          night-garden background (custom art over a prerendered base)
     jar.js             jar layout, lights inside, lantern glow, round lifecycle
     fireflies.js       spawning, flight model, expressions, idle attract mode
     ui.js              sound toggle + pointer input
     main.js            game loop (loads last, boots everything)
-  assets/              supplied art (fireflies ×3, jar)
+  assets/              supplied art (fireflies ×3, jar) + custom/ scenery
 assets/                full supplied reference set (charsheet, concept, sparkle)
 STYLE-GUIDE.md         the design contract every visual/motion/audio choice obeys
+DESIGN-NOTE.md         the added mechanic, the roadmap, the deliberate cuts
 PROCESS-LOG.md         honest build log: prompts, AI mistakes, corrections, time
-REVIEW-BRIEF.md        scope + rules for the code review pass
+REVIEW-BRIEF.md        scope + rules for the independent code review
+REVIEW-REPORT.md       what the review found, fixed, and flagged
+tests/review.cjs       15-test regression suite (node --test tests/review.cjs)
 ```
 
 Scripts are classic (non-module) and share one global scope; `index.html`
