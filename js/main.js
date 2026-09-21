@@ -18,7 +18,7 @@ function frame(now) {
   // (a hidden/embedded tab can report 0×0 at script-eval time).
   if (!seeded && W > 100 && H > 100) {
     seeded = true;
-    for (let i = 0; i < AMBIENT_COUNT; i++) spawnFirefly(false);
+    for (let i = 0; i < FIREFLY_MAX; i++) spawnFirefly(false);
   }
 
   if (seeded) updateIdle(dt);    // sleepy attract mode (fireflies.js)
