@@ -59,8 +59,15 @@ it owns. `js/config.js` is the tuning surface — game-feel changes start there.
 - **Flight** (`fireflies.js`): heading-based steering — each firefly has a
   direction that turns smoothly (no jitter), with edge steering, a keep-out
   bubble around the jar, gentle pairwise separation, and occasional
-  loop-de-loops. Three spawn entries: side drift, top drop-in, and a
-  "from the distance" approach that grows from small to full size.
+  loop-de-loops. Most fireflies drift locally; one or two **voyagers** sweep the
+  full width of the sky in long arcs (banking toward far waypoints, within the
+  same speed cap) so a child can track a friend travelling across the screen.
+  Three spawn entries: side drift, top drop-in, and a "from the distance"
+  approach that grows from small to full size.
+- **Population**: only drifting fireflies count toward a floor (4) and ceiling
+  (6), so tapping them all never leaves the sky empty and it never becomes a
+  swarm; refills are staggered — quick when the sky is nearly bare, an unhurried
+  trickle otherwise.
 - **Catching**: tap → surprised "oh!" face → eased bezier arc into the jar
   (sometimes with a loop or flutter flourish) → a soft pentatonic chime → the
   firefly becomes a countable colored light inside the glass.

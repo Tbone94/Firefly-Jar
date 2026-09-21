@@ -40,7 +40,11 @@ const GLOW_TINT = {
 /* ---------- gameplay tuning ---------- */
 
 const JAR_CAPACITY   = 10;    // catches per round (assignment spec)
-const AMBIENT_COUNT  = 5;     // fireflies drifting at once
+const FIREFLY_MIN    = 4;     // never fewer than this drifting — the sky is never empty
+const FIREFLY_MAX    = 6;     // never more than this — lively but never a swarm (calm)
+const VOYAGER_MAX    = 2;     // of those, up to this many are long-haul travelers that
+                              // sweep the full width of the sky; the rest drift locally
+const VOYAGER_SPD    = [34, 40]; // px/s range — quicker than local drift, at the ≤ ~40 cap
 const HIT_RADIUS     = 110;   // generous child-finger hit circle (CSS px)
 const IDLE_START     = 9;     // seconds untouched before the first sleepy doze
 const IDLE_REPEAT    = 10;    // base wait before the NEXT doze — each sleepy

@@ -62,6 +62,11 @@ If a new asset or effect doesn't match a rule here, it doesn't ship.
   segments; no jitter, no sudden direction changes.
 - Speed caps: ambient drift ≤ ~40 px/s (on a 1280-wide field); travel-to-jar ≤ ~300 px/s
   with ease-in-out, arcing path (never a beeline).
+- Most fireflies drift locally; **one or two "voyagers"** may traverse the full width of
+  the field in long, smooth arcs (with occasional big slow loops) so a child can track one
+  travelling across the screen — still within the drift speed cap, reach coming from
+  heading, not speed. The on-screen count stays within a calm floor/ceiling (4–6): the sky
+  is never empty and never a swarm.
 - Response to touch is **immediate but soft**: the tapped firefly reacts within 1 frame
   (glow bloom + tiny squash) so cause-and-effect is obvious, then floats jar-ward.
 - Celebration lasts 3–5 s, then settles. It's a warm swell, not an explosion.

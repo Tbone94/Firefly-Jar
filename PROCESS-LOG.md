@@ -136,3 +136,46 @@ fixed four real bugs (including a jar-overfill edge case), removed dead code
 with per-removal verification, flagged six feel-affecting items for my decision
 rather than changing them, and left a 15-test regression suite — which I re-ran
 independently before shipping to GitHub Pages.
+
+## Phase 5 — a second playtest pass (~30m, later)
+
+After living with the first cut and playtesting more, two things bothered me,
+and I dictated them to the AI in my own words:
+
+- "theres should never be a moment where the screen is empty, at somepoints you
+  can click all the firflies and it takes a bit too long for any of them to
+  appear again so potentially a fixed number of min/max firflies on scene to
+  make a better playing experience, ensure it is not chaotic and follow the
+  guidlines of being calm."
+- "the firflies more or less sit in the same spot, i thing a few firflies should
+  move across the length of the sreen in a sort of swooping, sometimes large
+  loops pattern so the child can track them across the screen, still calmy and
+  smooth."
+
+I had the AI diagnose the emptiness before changing anything. The real cause
+wasn't a slow spawn rate — it was that the refill counter included fireflies
+already *flying to the jar*, so after I tapped a handful the sky read as "still
+full" until they landed, then dropped to almost nothing. The fix: only fireflies
+actually drifting count toward a **population floor (min 4) and ceiling (max 6)**,
+so a replacement begins the instant a child taps, and new arrivals are spaced by
+a short cooldown so several never pop in on the same beat — never empty, never a
+swarm.
+
+For the second note, I was firm that "a few travel across the screen" must not
+mean "faster," because the style guide caps drift speed. So the AI built a
+**voyager** role: one or two fireflies at a time bank smoothly toward a waypoint
+on the far side of the sky — a long sweeping arc a child can track across the
+whole width — with an occasional big, slow loop, all within the existing speed
+cap. The rest keep their local drift.
+
+**Where the AI got it wrong, and how it was corrected (again).** The AI's first
+population fix looked right but I didn't trust it by eye, so I had it write a
+headless simulation that plays the game for 90 seconds under different tapping
+speeds and measures the longest stretch the sky sits empty. That caught two real
+misses: the floor still emptied *during the end-of-round celebration* (spawning
+was paused through it), and under fast tapping the refill lagged. We held the
+floor through the celebration and made the refill scale with how empty the sky
+is (quick when nearly bare, unhurried when just topping up). Re-measured: normal
+play never empties; even relentless spam leaves gaps under a second. The
+simulation also proved the voyagers sweep ~60% of the screen width per crossing.
+All 15 regression tests still pass.

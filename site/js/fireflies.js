@@ -14,6 +14,7 @@
    ============================================================ */
 
 let fireflies = [];
+let respawnCooldown = 0;   // spaces new arrivals so several never appear at once
 
 /* ---------- variant choice ---------- */
 
@@ -33,14 +34,16 @@ function pickVariant() {
 
 /* ---------- spawning ---------- */
 
-function spawnFirefly(edge = false) {
+function spawnFirefly(edge = false, urgent = false) {
   const margin = 80;
   let x, y, entry = 'seed';
   if (edge) {
     // three ways into the night, so an emptied sky refills from anywhere:
     // drift in from a side, float down from the top, or approach "from the
-    // distance" (appearing small in the open sky and growing closer)
-    const r = Math.random();
+    // distance" (appearing small in the open sky and growing closer).
+    // An urgent refill (below the population floor) skips the slow "from the
+    // distance" entry so a near-empty sky fills at full size right away.
+    const r = urgent ? Math.random() * 0.75 : Math.random();
     if (r < 0.4) {        entry = 'side';
       x = Math.random() < 0.5 ? -margin : W + margin;
       y = 60 + Math.random() * (H * 0.6);
@@ -62,8 +65,17 @@ function spawnFirefly(edge = false) {
       if (fireflies.every(o => Math.hypot(o.x - x, o.y - y) > 170)) break;
     }
   }
+  // Assign a role: most fireflies drift locally; up to VOYAGER_MAX are
+  // "voyagers" that sweep the full width of the sky. Bias toward keeping at
+  // least one voyager present, and never exceed the cap.
+  const voyagers = fireflies.filter(f => f.role === 'voyager').length;
+  const role = (voyagers < VOYAGER_MAX &&
+                Math.random() < (voyagers === 0 ? 0.7 : 0.3)) ? 'voyager' : 'wanderer';
   fireflies.push({
     x, y,
+    role,                                      // 'wanderer' (local) | 'voyager' (crosses)
+    voySpd: VOYAGER_SPD[0] + Math.random() * (VOYAGER_SPD[1] - VOYAGER_SPD[0]),
+    wp: null, loopRate: 0,                     // voyager waypoint + loop curvature
     // heading-based glide: a direction that turns smoothly, so paths are
     // intentional winding arcs instead of jittery bounces
     th: entry === 'side' ? (x < 0 ? 0 : Math.PI) + (Math.random() - 0.5) * 0.6
@@ -152,9 +164,47 @@ function nextFlightSegment(f) {
   }
 }
 
+/* ---------- voyager flight: the long crossings ----------
+   A voyager banks smoothly toward a far waypoint on the opposite side of the
+   sky, so it sweeps the whole width in one long arc a child can track across —
+   then, on arrival, picks the far side again. Occasionally it draws a big,
+   slow loop mid-crossing. Speed stays within the ambient cap; the reach comes
+   from steering across the field, not from moving faster. Returns { turn, spd }
+   for the shared integrator below. */
+
+function pickVoyagerWaypoint(f) {
+  const goRight = f.x < W / 2;                 // aim for whichever side is farther
+  f.wp = { x: goRight ? W - 80 - Math.random() * 40 : 80 + Math.random() * 40,
+           y: 90 + Math.random() * (H * 0.48) };
+}
+
+function steerVoyager(f, dt) {
+  const spd = f.voySpd;
+  // mid-crossing big lazy loop (occasional garnish, one slow revolution)
+  if (f.loopT > 0) {
+    f.loopT -= dt;
+    return { turn: f.loopRate * f.loopDir, spd };
+  }
+  f.nextLoopIn -= dt;
+  if (f.nextLoopIn <= 0 && f.x > 160 && f.x < W - 160 && f.y > 90 && f.y < H * 0.55) {
+    f.loopT = 9 + Math.random() * 3;           // ~9–12 s for a full, unhurried circle
+    f.loopRate = (Math.PI * 2) / f.loopT;      // radius ≈ spd / loopRate  (wide, calm)
+    f.loopDir = Math.random() < 0.5 ? 1 : -1;
+    f.nextLoopIn = 16 + Math.random() * 14;
+    return { turn: f.loopRate * f.loopDir, spd };
+  }
+  // otherwise bank toward the far waypoint at a gentle, capped rate (a wide arc
+  // when misaligned, a straight glide once pointed at it)
+  if (!f.wp || Math.hypot(f.wp.x - f.x, f.wp.y - f.y) < 130) pickVoyagerWaypoint(f);
+  const desired = Math.atan2(f.wp.y - f.y, f.wp.x - f.x);
+  const d = ((desired - f.th + Math.PI) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2) - Math.PI;
+  return { turn: Math.max(-0.35, Math.min(0.35, d * 0.8)), spd };
+}
+
 function beginSleep(f) {
   f.state = 'sleepy';
   f.sleepT = 0;
+  f.loopT = 0;             // drop any mid-flight loop so dozing is calm
 }
 
 /* A dozed-off firefly floats down into the jar: same bezier travel as a
@@ -229,27 +279,35 @@ function updateFireflies(dt) {
     if (f.state === 'drift' || f.state === 'sleepy') {
       // sleepy fireflies glide slower and slowly sink while dozing off
       const calm = 1 - 0.75 * f.sleepy;
-      // follow the designed path: advance the segment chain, easing the
-      // real turn rate toward the segment's curvature (no kinks at joins)
-      f.segT -= dt;
-      if (f.segT <= 0) nextFlightSegment(f);
-      const turnStep = 0.6 * dt;
-      f.turnCur += Math.max(-turnStep, Math.min(turnStep, f.turnTarget - f.turnCur));
-      let turn = f.turnCur;
-      let spd = f.spd;
+      let turn, spd;
 
-      // occasional playful loop-de-loop mid-flight (awake, on-screen only)
-      if (f.loopT > 0) {
-        f.loopT -= dt;
-        const prog = 1 - f.loopT / 3.2;
-        turn += (Math.PI * 2 / 3.2) * f.loopDir;
-        spd += 44 * Math.sin(Math.PI * Math.min(1, Math.max(0, prog)));
-      } else if (f.sleepy === 0) {
-        f.nextLoopIn -= dt;
-        if (f.nextLoopIn <= 0 && f.x > 100 && f.x < W - 100 && f.y < H * 0.6) {
-          f.loopT = 3.2;
-          f.loopDir = Math.random() < 0.5 ? 1 : -1;
-          f.nextLoopIn = 22 + Math.random() * 26;
+      if (f.role === 'voyager' && f.state === 'drift') {
+        // long cross-screen glide (steerVoyager). A dozing voyager falls
+        // through to the local path below, so it settles in place like the rest.
+        ({ turn, spd } = steerVoyager(f, dt));
+      } else {
+        // follow the designed path: advance the segment chain, easing the
+        // real turn rate toward the segment's curvature (no kinks at joins)
+        f.segT -= dt;
+        if (f.segT <= 0) nextFlightSegment(f);
+        const turnStep = 0.6 * dt;
+        f.turnCur += Math.max(-turnStep, Math.min(turnStep, f.turnTarget - f.turnCur));
+        turn = f.turnCur;
+        spd = f.spd;
+
+        // occasional playful loop-de-loop mid-flight (awake, on-screen only)
+        if (f.loopT > 0) {
+          f.loopT -= dt;
+          const prog = 1 - f.loopT / 3.2;
+          turn += (Math.PI * 2 / 3.2) * f.loopDir;
+          spd += 44 * Math.sin(Math.PI * Math.min(1, Math.max(0, prog)));
+        } else if (f.sleepy === 0) {
+          f.nextLoopIn -= dt;
+          if (f.nextLoopIn <= 0 && f.x > 100 && f.x < W - 100 && f.y < H * 0.6) {
+            f.loopT = 3.2;
+            f.loopDir = Math.random() < 0.5 ? 1 : -1;
+            f.nextLoopIn = 22 + Math.random() * 26;
+          }
         }
       }
 
@@ -313,9 +371,23 @@ function updateFireflies(dt) {
     }
   }
   fireflies = fireflies.filter(f => !f.done);
-  // keep the night populated (not during the celebration wind-down)
-  if (!celebrating) {
-    if (fireflies.length < AMBIENT_COUNT && Math.random() < 0.02) spawnFirefly(true);
+  // Keep the night gently populated. Only DRIFTING fireflies count toward the
+  // floor — ones already flying to the jar are on their way out, so a
+  // replacement begins the instant a child taps, not after the catch lands
+  // (which used to leave the sky briefly empty). The floor is held even during
+  // the celebration so the sky never empties as a round ends; the slow trickle
+  // up to the ceiling only runs in calm play.
+  const active = fireflies.filter(f => f.state === 'drift' || f.state === 'sleepy').length;
+  const deficit = FIREFLY_MIN - active;           // >0 when below the floor
+  respawnCooldown -= dt;
+  const trickle = !celebrating && Math.random() < 0.012;
+  if (respawnCooldown <= 0 && active < FIREFLY_MAX && (deficit > 0 || trickle)) {
+    spawnFirefly(true, deficit > 0);              // urgent refill enters at full size
+    // stagger arrivals so several never pop in on the same beat: fast when the
+    // sky is nearly empty, brisk below the floor, an unhurried trickle above it.
+    respawnCooldown = deficit >= 3 ? 0.25 + Math.random() * 0.25
+                    : deficit > 0  ? 0.6  + Math.random() * 0.4
+                    :                2.2  + Math.random() * 1.5;
   }
 }
 
