@@ -44,7 +44,7 @@ site/                  the deployable game (this folder IS the source)
 assets/                full supplied reference set (charsheet, concept, sparkle)
 STYLE-GUIDE.md         the design contract every visual/motion/audio choice obeys
 DESIGN-NOTE.md         the added mechanic, the roadmap, the deliberate cuts
-PROCESS-LOG.md         honest build log: prompts, AI mistakes, corrections, time
+PROCESS-LOG.md         honest build log: prompts, Claude's mistakes, corrections, time
 REVIEW-BRIEF.md        scope + rules for the independent code review
 REVIEW-REPORT.md       what the review found, fixed, and flagged
 tests/review.cjs       15-test regression suite (node --test tests/review.cjs)
@@ -59,18 +59,19 @@ it owns. `js/config.js` is the tuning surface — game-feel changes start there.
 - **Flight** (`fireflies.js`): heading-based steering — each firefly has a
   direction that turns smoothly (no jitter), with edge steering, a keep-out
   bubble around the jar, gentle pairwise separation, and occasional
-  loop-de-loops. Most fireflies drift locally; one or two **voyagers** sweep the
-  full width of the sky in long arcs (banking toward far waypoints, within the
-  same speed cap) so a child can track a friend travelling across the screen.
+  loop-de-loops. Most fireflies drift locally; one or two travel the full width
+  of the sky in long, mostly-horizontal passes (swooping around at the edges,
+  within the same speed cap) so a child can track a friend crossing the screen.
   Three spawn entries: side drift, top drop-in, and a "from the distance"
   approach that grows from small to full size.
 - **Population**: only drifting fireflies count toward a floor (4) and ceiling
   (6), so tapping them all never leaves the sky empty and it never becomes a
   swarm; refills are staggered — quick when the sky is nearly bare, an unhurried
   trickle otherwise.
-- **Catching**: tap → surprised "oh!" face → eased bezier arc into the jar
-  (sometimes with a loop or flutter flourish) → a soft pentatonic chime → the
-  firefly becomes a countable colored light inside the glass.
+- **Catching**: tap → surprised "oh!" face → one gentle twirl through the
+  character-sheet turnaround (side/back views) as it eased-arcs to the jar → a
+  soft pentatonic chime → the firefly becomes a countable colored light inside
+  the glass.
 - **Jar** (`jar.js`): brightness ramps sub-linearly across all 10 catches,
   capped so the full jar is a cozy lantern, never a floodlight
   (neurodivergent-friendly). One gentle pulse marks the halfway point.

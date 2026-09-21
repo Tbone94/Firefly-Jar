@@ -1,12 +1,13 @@
 # Firefly Jar — Process Log
 
-How this was built, in order. I directed; AI executed and verified under that
+How this was built, in order. I directed; Claude executed and verified under that
 direction. The prompts below are mine, unedited.
 
 ## Tools used, and why
 
 - **Claude (Claude Code)** — the primary tool for everything: design research, the
-  style guide, all game code, and verification
+  style guide, all game code, and verification. Models: mainly **Claude Fable** for
+  the build, and **Claude Opus 4.8** for this final polish session.
 - **Python / Pillow** — measured the supplied sprites (eye/mouth landmark coordinates,
   body colors) so the sleepy/surprised expression overlays anchor to real pixels, and
   cropped/enlarged the concept sheet's garden panel to art-direct the background from
@@ -19,7 +20,7 @@ direction. The prompts below are mine, unedited.
 
 ## Key prompts, verbatim
 
-My direction to the AI, unedited (these steered the whole build):
+My direction to Claude, unedited (these steered the whole build):
 
 - "do research first on what kind of mechanic would be most beneficial to this this
   remember to keep the example mechanics small"
@@ -38,7 +39,7 @@ My direction to the AI, unedited (these steered the whole build):
 - "the review also needs to flag dead code and safely remove it without affecting
   anything functional"
 
-(The AI's own working prompts to sub-tools — pixel scans, flight simulations, the
+(Claude's own working prompts to sub-tools — pixel scans, flight simulations, the
 review scope — are recorded in REVIEW-BRIEF.md and the repo history.)
 
 ## Rough time split (~2h 45m of the 4h cap)
@@ -50,14 +51,14 @@ review scope — are recorded in REVIEW-BRIEF.md and the repo history.)
 
 ## Phase 1 — concept, research, and the design system (~1h)
 
-I pulled the brief and all seven reference assets first and had the AI inventory
+I pulled the brief and all seven reference assets first and had Claude inventory
 every image before any decisions — I wanted the concept sheet driving the design,
 not anyone's memory of it.
 
 Ideation was mine to steer, and I set two rules up front: research before
 proposals (nurture's own philosophy, plus how the best preschool studios teach
 through demonstration), and mechanics at the scale of the brief's own examples.
-The AI's first pitch was a "shy firefly" you coax by holding still — clever, but
+Claude's first pitch was a "shy firefly" you coax by holding still — clever, but
 I questioned whether a pre-reader would ever discover it, and when the honest
 answer required layers of hint systems, I cut it as over-scoped. I deferred the
 final mechanic choice until I could feel the core loop in my hands.
@@ -88,7 +89,7 @@ built to my spec. Later I generated my own scenery set with Gemini — moon,
 clouds, flowers, two foliage strips — proofed it in an isolated mockup first,
 and only adopted it into the real game after I approved the look.
 
-**Where the AI got it wrong, and how it was corrected** (the brief asks, so
+**Where Claude got it wrong, and how it was corrected** (the brief asks, so
 honestly): fireflies once spawned bunched in a corner (a zero-size-viewport
 edge case); the supplied sparkle PNG turned out to have its background baked in,
 so I approved switching celebration sparkles to code-drawn particles; the jar's
@@ -130,7 +131,7 @@ sampling, and a 3,000-draw color-distribution check back every number above.
 I had the code restructured to handoff standard (researched first: modules
 split by concern, every tuning constant on one config surface, a README that
 maps the architecture in a minute), put the project under git, and then
-commissioned an independent AI review — Astra (Codex) — against my written
+commissioned an independent code review — Astra (Codex) — against my written
 brief: bugs, human legibility, and dead code flagged then safely removed. It
 fixed four real bugs (including a jar-overfill edge case), removed dead code
 with per-removal verification, flagged six feel-affecting items for my decision
@@ -140,7 +141,7 @@ independently before shipping to GitHub Pages.
 ## Phase 5 — a second playtest pass (~30m, later)
 
 After living with the first cut and playtesting more, two things bothered me,
-and I dictated them to the AI in my own words:
+and I dictated them to Claude in my own words:
 
 - "theres should never be a moment where the screen is empty, at somepoints you
   can click all the firflies and it takes a bit too long for any of them to
@@ -152,7 +153,7 @@ and I dictated them to the AI in my own words:
   loops pattern so the child can track them across the screen, still calmy and
   smooth."
 
-I had the AI diagnose the emptiness before changing anything. The real cause
+I had Claude diagnose the emptiness before changing anything. The real cause
 wasn't a slow spawn rate — it was that the refill counter included fireflies
 already *flying to the jar*, so after I tapped a handful the sky read as "still
 full" until they landed, then dropped to almost nothing. The fix: only fireflies
@@ -162,13 +163,13 @@ a short cooldown so several never pop in on the same beat — never empty, never
 swarm.
 
 For the second note, I was firm that "a few travel across the screen" must not
-mean "faster," because the style guide caps drift speed. So the AI built a
-**voyager** role: one or two fireflies at a time bank smoothly toward a waypoint
-on the far side of the sky — a long sweeping arc a child can track across the
-whole width — with an occasional big, slow loop, all within the existing speed
-cap. The rest keep their local drift.
+mean "faster," because the style guide caps drift speed. So Claude built it so
+one or two fireflies at a time bank smoothly toward a waypoint on the far side of
+the sky — a long sweeping arc a child can track across the whole width — with an
+occasional big, slow loop, all within the existing speed cap. The rest keep their
+local drift.
 
-**Where the AI got it wrong, and how it was corrected (again).** The AI's first
+**Where Claude got it wrong, and how it was corrected (again).** Claude's first
 population fix looked right but I didn't trust it by eye, so I had it write a
 headless simulation that plays the game for 90 seconds under different tapping
 speeds and measures the longest stretch the sky sits empty. That caught two real
@@ -177,5 +178,38 @@ was paused through it), and under fast tapping the refill lagged. We held the
 floor through the celebration and made the refill scale with how empty the sky
 is (quick when nearly bare, unhurried when just topping up). Re-measured: normal
 play never empties; even relentless spam leaves gaps under a second. The
-simulation also proved the voyagers sweep ~60% of the screen width per crossing.
+simulation also proved these fireflies sweep ~60% of the screen width per crossing.
 All 15 regression tests still pass.
+
+## Phase 6 — playtest round two: passes and a twirl (~30m, later)
+
+I did a little playtesting and gave two more notes in my own words.
+
+First, the fireflies still weren't right:
+
+- "it still just looks more like they are bouncing/floating on screen instead of
+  gently passing across screen does that make sense?"
+
+Claude's first fireflies banked toward waypoints. The fix was to make them commit
+to a direction: a firefly now makes a mostly-horizontal pass across the whole
+width, easing toward a drifting lane, with one wide swoop-turn at each edge.
+(Speed stays under the calm cap.)
+
+Second, I wanted to utilize all the character reference images you gave:
+
+- "id like to add a little animation to the fireflies when you tap them, not only
+  should it show the surprise face but the reference drawings show full body side
+  and back, can we add a cohesive little spin? would that still fit the guidelines
+  as well as not be too chaotic/frantic or overwhelming for children 4-7?"
+- "you tap them it makes the surprise face, goes to the standing position and
+  twirls on its way to the jar."
+
+I checked it against the calm rules first, then set the guardrails: one slow
+eased rotation, only on a tapped firefly (idle/sleepy ones never spin, so the
+bedtime demo stays still), and no strobe. Then we built it from the character
+sheet's own turnaround — I had Claude extract the front/three-quarter/side/back
+views, key out the sheet's grey background, and recolour the glowing belly to
+each firefly's colour so a pink or teal friend keeps its colour through the turn.
+On tap it holds the surprised front pose, then turns once — front, three-quarter,
+side, back, three-quarter, front — landing front-facing as it floats to the jar.
+It replaced the old random loop-de-loop, so the catch reads as one clear idea.
