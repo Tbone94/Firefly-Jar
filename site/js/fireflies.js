@@ -66,16 +66,16 @@ function spawnFirefly(edge = false, urgent = false) {
     }
   }
   // Assign a role: most fireflies drift locally; up to VOYAGER_MAX are
-  // "voyagers" that sweep the full width of the sky. Bias toward keeping at
-  // least one voyager present, and never exceed the cap.
+  // "voyagers" that pass the full width of the sky. Bias toward keeping about
+  // two present, and never exceed the cap.
   const voyagers = fireflies.filter(f => f.role === 'voyager').length;
-  const role = (voyagers < VOYAGER_MAX &&
-                Math.random() < (voyagers === 0 ? 0.7 : 0.3)) ? 'voyager' : 'wanderer';
+  const pVoyager = voyagers === 0 ? 0.75 : voyagers === 1 ? 0.45 : 0.2;
+  const role = (voyagers < VOYAGER_MAX && Math.random() < pVoyager) ? 'voyager' : 'wanderer';
   fireflies.push({
     x, y,
     role,                                      // 'wanderer' (local) | 'voyager' (crosses)
     voySpd: VOYAGER_SPD[0] + Math.random() * (VOYAGER_SPD[1] - VOYAGER_SPD[0]),
-    wp: null, loopRate: 0,                     // voyager waypoint + loop curvature
+    dir: 0, laneY: 0, bankT: 0, bankRate: 0, loopRate: 0,  // voyager pass state
     // heading-based glide: a direction that turns smoothly, so paths are
     // intentional winding arcs instead of jittery bounces
     th: entry === 'side' ? (x < 0 ? 0 : Math.PI) + (Math.random() - 0.5) * 0.6
@@ -94,6 +94,7 @@ function spawnFirefly(edge = false, urgent = false) {
     size: 84 + Math.random() * 22,             // display height
     flip: Math.random() < 0.5,
     state: 'drift',                            // see state machine above
+    spin: false,                               // true = twirl on the way to the jar (tapped)
     squash: 0,                                 // tap-response squash timer
     sleepy: 0,                                 // 0 awake → 1 eyes closed
     surprise: 0,                               // "oh!" face timer after a tap
@@ -165,40 +166,51 @@ function nextFlightSegment(f) {
 }
 
 /* ---------- voyager flight: the long crossings ----------
-   A voyager banks smoothly toward a far waypoint on the opposite side of the
-   sky, so it sweeps the whole width in one long arc a child can track across —
-   then, on arrival, picks the far side again. Occasionally it draws a big,
-   slow loop mid-crossing. Speed stays within the ambient cap; the reach comes
-   from steering across the field, not from moving faster. Returns { turn, spd }
-   for the shared integrator below. */
+   A voyager makes clean, mostly-horizontal passes across the whole width of the
+   sky — a friend a child can watch travel from one side to the other — easing
+   up or down toward a slowly-shifting lane as it goes, never diving. It commits
+   to a direction (that steady travel, not speed, is what reads as "passing
+   across" rather than floating in place); at each edge it banks through one wide
+   swoop and heads back, and once in a while draws a big slow loop mid-pass. All
+   within the ambient speed cap. Returns { turn, spd } for the shared integrator. */
 
-function pickVoyagerWaypoint(f) {
-  const goRight = f.x < W / 2;                 // aim for whichever side is farther
-  f.wp = { x: goRight ? W - 80 - Math.random() * 40 : 80 + Math.random() * 40,
-           y: 90 + Math.random() * (H * 0.48) };
-}
+const VOY_TURN_AT = 150;   // px from an edge where the wide swoop-turn begins
 
 function steerVoyager(f, dt) {
   const spd = f.voySpd;
-  // mid-crossing big lazy loop (occasional garnish, one slow revolution)
-  if (f.loopT > 0) {
-    f.loopT -= dt;
-    return { turn: f.loopRate * f.loopDir, spd };
+  if (!f.dir) { f.dir = f.x < W / 2 ? 1 : -1; f.laneY = f.y; f.th = f.dir > 0 ? 0 : Math.PI; }
+
+  // wide swoop-turn at each edge (begins before the bezel so the arc stays
+  // on-screen); half a circle, then reverse direction and pick a fresh lane
+  if (f.bankT > 0) {
+    f.bankT -= dt;
+    if (f.bankT <= 0) { f.dir = -f.dir; f.laneY = 110 + Math.random() * (H * 0.46); }
+    return { turn: f.bankRate, spd };
   }
+  if ((f.dir > 0 && f.x > W - VOY_TURN_AT) || (f.dir < 0 && f.x < VOY_TURN_AT)) {
+    f.bankT = 5 + Math.random() * 1.5;                 // ~5–6.5 s for the half-circle
+    const s = f.y > H * 0.3 ? -1 : 1;                  // swoop toward the open sky
+    f.bankRate = s * f.dir * (Math.PI / f.bankT);      // sign turns it back around
+    return { turn: f.bankRate, spd };
+  }
+
+  // occasional big lazy loop mid-pass (rare garnish, one slow revolution)
+  if (f.loopT > 0) { f.loopT -= dt; return { turn: f.loopRate * f.loopDir, spd }; }
   f.nextLoopIn -= dt;
-  if (f.nextLoopIn <= 0 && f.x > 160 && f.x < W - 160 && f.y > 90 && f.y < H * 0.55) {
-    f.loopT = 9 + Math.random() * 3;           // ~9–12 s for a full, unhurried circle
-    f.loopRate = (Math.PI * 2) / f.loopT;      // radius ≈ spd / loopRate  (wide, calm)
+  if (f.nextLoopIn <= 0 && f.x > VOY_TURN_AT + 80 && f.x < W - VOY_TURN_AT - 80) {
+    f.loopT = 9 + Math.random() * 3;                   // ~9–12 s full, unhurried circle
+    f.loopRate = (Math.PI * 2) / f.loopT;
     f.loopDir = Math.random() < 0.5 ? 1 : -1;
-    f.nextLoopIn = 16 + Math.random() * 14;
+    f.nextLoopIn = 26 + Math.random() * 20;            // rarer than a wanderer's loop
     return { turn: f.loopRate * f.loopDir, spd };
   }
-  // otherwise bank toward the far waypoint at a gentle, capped rate (a wide arc
-  // when misaligned, a straight glide once pointed at it)
-  if (!f.wp || Math.hypot(f.wp.x - f.x, f.wp.y - f.y) < 130) pickVoyagerWaypoint(f);
-  const desired = Math.atan2(f.wp.y - f.y, f.wp.x - f.x);
+
+  // the pass itself: hold a near-horizontal heading in the travel direction,
+  // easing gently toward the current lane so it rises/falls but never dives
+  const dy = Math.max(-120, Math.min(120, f.laneY - f.y));
+  const desired = Math.atan2(dy * 0.4, f.dir);
   const d = ((desired - f.th + Math.PI) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2) - Math.PI;
-  return { turn: Math.max(-0.35, Math.min(0.35, d * 0.8)), spd };
+  return { turn: Math.max(-0.3, Math.min(0.3, d * 0.9)), spd };
 }
 
 function beginSleep(f) {
@@ -211,6 +223,7 @@ function beginSleep(f) {
    tapped catch, but slower, with a gentle swaying descent. */
 function startSleepTravel(f) {
   f.state = 'travel';
+  f.spin = false;             // dozing fireflies drift down calmly — never spin
   f.t = 0;
   f.fromX = f.x; f.fromY = f.y;
   const midX = (f.x + jar.mouthX) / 2, midY = (f.y + jar.mouthY) / 2;
@@ -232,6 +245,7 @@ function tapFirefly(f) {
   f.sleepy = 0;                  // a tap wakes a dozing firefly
   // "oh!" — held long enough to still be seen after the finger lifts
   f.surprise = 1.1;
+  f.spin = true;                 // surprised front pose, then one gentle twirl to the jar
   f.fromX = f.x; f.fromY = f.y;
   // Arcing path: control point off to the side, above the direct line (§5).
   const midX = (f.x + jar.mouthX) / 2, midY = (f.y + jar.mouthY) / 2;
@@ -240,17 +254,10 @@ function tapFirefly(f) {
   const arc = Math.min(140, len * 0.35) * (f.x < jar.mouthX ? -1 : 1);
   f.ctrlX = midX + (-dy / len) * arc;
   f.ctrlY = midY + (dx / len) * arc - 40;
-  f.travelDur = Math.max(0.9, len / 300);      // ≤ ~300 px/s, eased
-  // Occasional flight flourish (never every time — predictable-with-delight):
-  // ~1 in 3 does one lazy loop-de-loop, ~1 in 5 a quick happy flutter.
-  const flourish = Math.random();
-  f.loop = null; f.flutter = false;
-  if (flourish < 0.33) {
-    f.loop = { r: Math.min(55, len * 0.18) };
-    f.travelDur += 0.5;                        // loops take a moment longer
-  } else if (flourish < 0.53) {
-    f.flutter = true;
-  }
+  // A touch slower than a plain catch so the surprise face reads and the single
+  // turn stays unhurried: hold pose (SPIN_HOLD) + one calm rotation.
+  f.travelDur = Math.max(1.3, len / 280);
+  f.loop = null; f.flutter = false;            // the twirl is the flourish now
   catchSound();
 }
 
@@ -417,6 +424,35 @@ function drawFireflies() {
     const gx = f.x + (f.flip ? -size*0.18 : size*0.18), gy = f.y + hover + size*0.22;
     ctx.drawImage(glowDisc(GLOW_TINT[f.variant]), gx - gr, gy - gr, gr * 2, gr * 2);
     ctx.restore();
+
+    // tap twirl: after the surprised front pose (SPIN_HOLD), a tapped firefly
+    // turns once through ¾ → side → back → ¾ → front on its way to the jar,
+    // landing front-facing. Dozing fireflies never spin (f.spin stays false).
+    if (f.spin && f.state === 'travel') {
+      const elapsed = f.t * f.travelDur;
+      const rotWin  = Math.max(0.001, f.travelDur - SPIN_HOLD);
+      const phase   = Math.min(1, Math.max(0, (elapsed - SPIN_HOLD) / rotWin));
+      if (phase > 0) {
+        const a = easeInOut(phase) * 360;         // one eased, unhurried rotation
+        let pose = 'front', flip = false;
+        if (a >= 30 && a < 75)        pose = 'threequarter';
+        else if (a >= 75 && a < 150)  pose = 'side';
+        else if (a >= 150 && a < 210) pose = 'back';
+        else if (a >= 210 && a < 285) { pose = 'side'; flip = true; }
+        else if (a >= 285 && a < 330) { pose = 'threequarter'; flip = true; }
+        const simg = IMAGES[`spin_${f.variant}_${pose}`];
+        if (simg && simg.complete && simg.naturalWidth) {
+          const sh = size * SPIN_SCALE, sw = sh * (simg.naturalWidth / simg.naturalHeight);
+          ctx.save();
+          ctx.globalAlpha = fadeIn;
+          ctx.translate(f.x, f.y + hover);
+          if (flip) ctx.scale(-1, 1);
+          ctx.drawImage(simg, -sw / 2, -sh / 2, sw, sh);
+          ctx.restore();
+          continue;                                // skip the normal sprite + face overlays
+        }
+      }
+    }
 
     ctx.save();
     ctx.globalAlpha = fadeIn;
