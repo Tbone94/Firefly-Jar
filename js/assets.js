@@ -24,6 +24,13 @@ const SPRITES = [
   ['bushesFar',   'assets/custom/bushes_far.png'],
 ];
 
+// tap-spin turnaround frames (front / three-quarter / side / back), one set per
+// variant — extracted from the character sheet's turnaround and recolored to
+// each glow. Keyed as spin_<variant>_<pose>.
+for (const variant of ['yellow', 'pink', 'teal'])
+  for (const pose of ['front', 'threequarter', 'side', 'back'])
+    SPRITES.push([`spin_${variant}_${pose}`, `assets/spin/${pose}_${variant}.png`]);
+
 for (const [key, src] of SPRITES) {
   const img = new Image();
   img.src = src;

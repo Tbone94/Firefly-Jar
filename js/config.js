@@ -42,14 +42,16 @@ const GLOW_TINT = {
 const JAR_CAPACITY   = 10;    // catches per round (assignment spec)
 const FIREFLY_MIN    = 4;     // never fewer than this drifting — the sky is never empty
 const FIREFLY_MAX    = 6;     // never more than this — lively but never a swarm (calm)
-const VOYAGER_MAX    = 2;     // of those, up to this many are long-haul travelers that
-                              // sweep the full width of the sky; the rest drift locally
-const VOYAGER_SPD    = [34, 40]; // px/s range — quicker than local drift, at the ≤ ~40 cap
+const VOYAGER_MAX    = 3;     // of those, up to this many are long-haul travelers that
+                              // pass the full width of the sky; the rest drift locally
+const VOYAGER_SPD    = [36, 40]; // px/s range — quicker than local drift, at the ≤ ~40 cap
 const HIT_RADIUS     = 110;   // generous child-finger hit circle (CSS px)
 const IDLE_START     = 9;     // seconds untouched before the first sleepy doze
 const IDLE_REPEAT    = 10;    // base wait before the NEXT doze — each sleepy
                               // firefly resets the clock (+ up to 6 s random)
 const HALF_PULSE_DUR = 1.8;   // halfway-milestone glow swell (s); slow, no flash
+const SPIN_HOLD      = 0.4;   // s a tapped firefly holds the surprised front pose before the twirl
+const SPIN_SCALE     = 1.16;  // twirl-frame display height vs the firefly's normal size
 
 /* ---------- sprite metrics (measured, in source-PNG pixels) ---------- */
 
