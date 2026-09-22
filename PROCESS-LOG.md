@@ -1,26 +1,26 @@
 # Firefly Jar — Process Log
 
-How this was built, in order. I directed; Claude executed and verified under that
-direction. The prompts below are mine, unedited.
+I directed; Claude executed and verified under that direction. Raw and in order,
+organized by the four things you asked for.
 
-## Tools used, and why
+## Which tools I used, and why
 
-- **Claude (Claude Code)** — the primary tool for everything: design research, the
-  style guide, all game code, and verification. Models: mainly **Claude Fable** for
-  the build, and **Claude Opus 4.8** for this final polish session.
-- **Python / Pillow** — measured the supplied sprites (eye/mouth landmark coordinates,
-  body colors) so the sleepy/surprised expression overlays anchor to real pixels, and
-  cropped/enlarged the concept sheet's garden panel to art-direct the background from
-  the actual reference.
-- **Gemini** — my own scenery art (moon, clouds, flowers, foliage strips), generated
-  against the style guide's reference-anchored prompt rules.
-- **WebAudio (synthesized sound, no files)** — pentatonic chimes generated in code.
-- **Astra (Codex)** — independent code review pass (bugs, structure, dead code) against
-  a written brief (REVIEW-BRIEF.md)
+- **Claude (Claude Code)** — the primary tool for everything: design research,
+  the style guide, all game code, and verification. Claude Fable for the build,
+  Claude Opus 4.8 for the final polish pass.
+- **Python / Pillow** — measured the supplied sprites (eye/mouth landmarks, body
+  colors) so the expression overlays anchor to real pixels; cropped and enlarged
+  the concept sheet's garden panel to art-direct the background from the actual
+  reference; extracted the charsheet turnaround for the tap-twirl frames.
+- **Gemini** — my own scenery art (moon, clouds, flowers, foliage strips),
+  generated under the style guide's reference-anchored prompt rules.
+- **WebAudio** — pentatonic chimes synthesized in code; no audio files.
+- **Astra (Codex)** — independent code review against a written scope
+  (REVIEW-BRIEF.md).
 
 ## Key prompts, verbatim
 
-My direction to Claude, unedited (these steered the whole build):
+My direction to Claude, unedited — these steered the whole build:
 
 - "do research first on what kind of mechanic would be most beneficial to this this
   remember to keep the example mechanics small"
@@ -38,179 +38,88 @@ My direction to Claude, unedited (these steered the whole build):
   paths can have the fireflies do a loop"
 - "the review also needs to flag dead code and safely remove it without affecting
   anything functional"
+- "theres should never be a moment where the screen is empty… ensure it is not
+  chaotic and follow the guidlines of being calm"
+- "it still just looks more like they are bouncing/floating on screen instead of
+  gently passing across screen does that make sense?"
+- "id like to add a little animation to the fireflies when you tap them… the
+  reference drawings show full body side and back, can we add a cohesive little
+  spin? would that still fit the guidelines as well as not be too chaotic/frantic
+  or overwhelming for children 4-7?"
 
-(Claude's own working prompts to sub-tools — pixel scans, flight simulations, the
-review scope — are recorded in REVIEW-BRIEF.md and the repo history.)
+## Where the AI got it wrong, and how I corrected it
+
+- Fireflies once spawned bunched in a corner — a zero-size-viewport edge case;
+  fixed and verified.
+- The supplied sparkle PNG turned out to have its background baked in — I
+  approved switching celebration sparkles to code-drawn particles.
+- The jar's inner lights collapsed into a straight line (a trig resonance) —
+  caught with a state dump, replaced with a cleaner placement scheme.
+- The first jar glow was nothing like the concept sheet's warm lantern — I
+  pushed it through three rounds until it matched.
+- First-draft fronds read as "seaweed" — rewritten.
+- Gemini exported "transparent" art with the checkerboard baked into the pixels
+  — I had the moon and clouds regenerated on solid navy that keys cleanly.
+- The "sky sometimes empties" bug: Claude's first fix looked right, so I made it
+  prove it — a headless simulation playing 90 seconds at different tapping
+  speeds caught two real misses (the floor still emptied during the celebration,
+  and refills lagged under fast tapping). Both fixed, re-measured: normal play
+  never empties.
+- Claude's first cross-screen fliers still read as "floating." I said so in
+  plain words; the fix was making them commit to a direction — full-width
+  passes with one wide swoop-turn at each edge, inside the calm speed cap.
+
+Every fix was verified before moving on: canvas pixel sampling, simulated
+multi-minute flights, a 3,000-draw color-distribution check, and a 15-test
+regression suite (`node --test tests/review.cjs`).
 
 ## Rough time split (~3h 15m of the 4h cap)
 
 - ~35% — design research, mechanic debate, style guide (before any code)
 - ~30% — build + fix cycles (core loop, garden, jar, expressions, idle mode)
 - ~25% — playtest-driven feel tuning (glow, flight, spawns, variety)
-- ~10% — handoff: restructure to modules, README, review brief, this write-up
-- plus one later ~30m playtest-polish pass (Phases 5–6 below)
+- ~10% — handoff: modules, README, review brief, this write-up
+- plus one later ~30m playtest-polish pass (below)
 
-## Phase 1 — concept, research, and the design system (~1h)
+## How the build went, briefly
 
-I pulled the brief and all seven reference assets first and had Claude inventory
-every image before any decisions — I wanted the concept sheet driving the design,
-not anyone's memory of it.
+**Design first (~1h).** Pulled the brief and all seven reference assets and had
+Claude inventory every image before any decisions. Two rules up front: research
+before proposals, and mechanics at the scale of the brief's own examples —
+Claude's "shy firefly" pitch was clever but over-scoped for a pre-reader, so I
+cut it. I designed the sleepy-firefly idle demo to my own spec and checked it
+(and every roadmap idea) against 4–7 developmental milestones. Before any game
+code I required a written design contract — STYLE-GUIDE.md, built from the
+supplied charsheet and concept sheet: palette roles, motion caps, a no-text
+pre-reader UI contract, and the sensory-safety (neurodivergent-friendly) rules
+I insisted on. Early cut: a 3D pipeline — the brief says flat.
 
-Ideation was mine to steer, and I set two rules up front: research before
-proposals (nurture's own philosophy, plus how the best preschool studios teach
-through demonstration), and mechanics at the scale of the brief's own examples.
-Claude's first pitch was a "shy firefly" you coax by holding still — clever, but
-I questioned whether a pre-reader would ever discover it, and when the honest
-answer required layers of hint systems, I cut it as over-scoped. I deferred the
-final mechanic choice until I could feel the core loop in my hands.
+**Build (~50m).** Plain JS + canvas, my call — a one-screen game doesn't need
+an engine. Garden rebuilt from the actual concept-sheet panel; expressions
+anchored to pixel-measured sprite landmarks; the idle demo to my spec; my own
+Gemini scenery proofed in an isolated mockup and only adopted after I approved
+the look.
 
-The mechanic I ultimately designed is the **sleepy fireflies idle demo**: my
-spec, down to the details — the charsheet's sleepy face, one firefly at a time,
-a slow drift into the jar, the round completing on its own so the game teaches
-itself to a watching child without a single word. I checked it (and every
-roadmap idea) against 4–7 developmental milestones before committing.
+**Playtest tuning (~40m).** I playtested every build and dictated changes from
+feel: caught fireflies became individual countable lights (clearer for kids,
+calmer for neurodivergent kids); jar brightness re-curved with a hard luminance
+ceiling — a cozy lantern, never a floodlight; flight redesigned into
+constant-curvature figures a 4-year-old's eye can track; three spawn entries so
+a fast tapper never waits; a parent-proof chime; keep-out bubbles around the
+jar and sound button so no tap is ambiguous.
 
-Before allowing any game code, I required a written design contract:
-`STYLE-GUIDE.md`, built from the supplied charsheet and concept sheet — exact
-palette roles, shape and glow language, motion caps, a no-text pre-reader UI
-contract, the sensory-safety (neurodivergent-friendly) rules I insisted on, and
-a prompt template that locks any future AI-generated art to the references.
+**Independent review (~15m).** Restructured to handoff standard (modules by
+concern, one config surface, a README architecture tour), then commissioned
+Astra (Codex) to review against my written scope: four real bugs fixed
+(including a jar-overfill edge case), dead code removed with per-removal
+verification, six judgment calls flagged to me instead of changed, and a
+15-test regression suite left behind — which I re-ran before shipping.
 
-Deliberate early cut: a Gemini→Meshy 3D pipeline. Tempting (nurture's other
-games are 3D), but the brief says flat — spec fidelity beat spectacle.
-
-## Phase 2 — build (~50m)
-
-The core loop went up to spec in plain JS + canvas — my call to skip engines;
-a one-screen game doesn't need scaffolding. Then the garden, rebuilt from the
-actual concept-sheet panel (cropped and enlarged, so we matched the reference,
-not a memory of it); the jar's brightness states; the expression system,
-anchored to pixel-measured face landmarks on the sprites; and the idle demo
-built to my spec. Later I generated my own scenery set with Gemini — moon,
-clouds, flowers, two foliage strips — proofed it in an isolated mockup first,
-and only adopted it into the real game after I approved the look.
-
-**Where Claude got it wrong, and how it was corrected** (the brief asks, so
-honestly): fireflies once spawned bunched in a corner (a zero-size-viewport
-edge case); the supplied sparkle PNG turned out to have its background baked in,
-so I approved switching celebration sparkles to code-drawn particles; the jar's
-inner lights once collapsed into a straight line (a trig resonance — caught by
-a state dump, replaced with a cleaner placement scheme); the first jar glow was
-nothing like the concept sheet's warm lantern until I pushed it through three
-rounds; first-draft fronds read as "seaweed" and got rewritten; and Gemini
-exported "transparent" art as JPEGs with the checkerboard baked into the pixels
-— crisp foliage could be masked out, but the glowing moon and clouds couldn't,
-so I regenerated them on a solid navy background that keys cleanly. Every fix
-was verified before moving on.
-
-## Phase 3 — playtest-driven feel (~40m)
-
-I playtested every build and dictated the changes from feel:
-
-- Caught fireflies became **individual, countable colored lights** instead of a
-  merged glow — clearer for kids, calmer for neurodivergent kids.
-- Jar brightness re-curved so every catch adds a visible step, with a hard
-  luminance ceiling — a cozy lantern, never a floodlight — plus a gentle
-  halfway pulse.
-- Flight went through three rounds under my direction: slower and more varied,
-  then smoother, and finally a full redesign into **constant-curvature figures**
-  — wide arcs, U-turns, occasional S-curves and loops, separated by straight
-  glides — because I wanted paths a 4-year-old's eye can track and predict.
-- Three spawn entries (sides, top, "from the distance," growing closer) so a
-  fast tapper never empties the sky and waits.
-- The catch chime re-voiced to a soft, rounded sine with slight per-tap
-  variation — deliberately parent-proof under rapid tapping.
-- Keep-out bubbles around the jar and the sound button so no tap is ever
-  ambiguous, and scenery (moon, scattered clouds) kept static and unglowing so
-  nothing reads as tappable.
-
-Tuning was measured, not guessed: simulated multi-minute flights, canvas pixel
-sampling, and a 3,000-draw color-distribution check back every number above.
-
-## Phase 4 — independent review and handoff (~15m)
-
-I had the code restructured to handoff standard (researched first: modules
-split by concern, every tuning constant on one config surface, a README that
-maps the architecture in a minute), put the project under git, and then
-commissioned an independent code review — Astra (Codex) — against my written
-brief: bugs, human legibility, and dead code flagged then safely removed. It
-fixed four real bugs (including a jar-overfill edge case), removed dead code
-with per-removal verification, flagged six feel-affecting items for my decision
-rather than changing them, and left a 15-test regression suite — which I re-ran
-independently before shipping to GitHub Pages.
-
-## Phase 5 — a second playtest pass (later; Phases 5–6 together ~30m)
-
-After living with the first cut and playtesting more, two things bothered me,
-and I dictated them to Claude in my own words:
-
-- "theres should never be a moment where the screen is empty, at somepoints you
-  can click all the firflies and it takes a bit too long for any of them to
-  appear again so potentially a fixed number of min/max firflies on scene to
-  make a better playing experience, ensure it is not chaotic and follow the
-  guidlines of being calm."
-- "the firflies more or less sit in the same spot, i thing a few firflies should
-  move across the length of the sreen in a sort of swooping, sometimes large
-  loops pattern so the child can track them across the screen, still calmy and
-  smooth."
-
-I had Claude diagnose the emptiness before changing anything. The real cause
-wasn't a slow spawn rate — it was that the refill counter included fireflies
-already *flying to the jar*, so after I tapped a handful the sky read as "still
-full" until they landed, then dropped to almost nothing. The fix: only fireflies
-actually drifting count toward a **population floor (min 4) and ceiling (max 6)**,
-so a replacement begins the instant a child taps, and new arrivals are spaced by
-a short cooldown so several never pop in on the same beat — never empty, never a
-swarm.
-
-For the second note, I was firm that "a few travel across the screen" must not
-mean "faster," because the style guide caps drift speed. So Claude built it so
-one or two fireflies at a time bank smoothly toward a waypoint on the far side of
-the sky — a long sweeping arc a child can track across the whole width — with an
-occasional big, slow loop, all within the existing speed cap. The rest keep their
-local drift.
-
-**Where Claude got it wrong, and how it was corrected (again).** Claude's first
-population fix looked right but I didn't trust it by eye, so I had it write a
-headless simulation that plays the game for 90 seconds under different tapping
-speeds and measures the longest stretch the sky sits empty. That caught two real
-misses: the floor still emptied *during the end-of-round celebration* (spawning
-was paused through it), and under fast tapping the refill lagged. We held the
-floor through the celebration and made the refill scale with how empty the sky
-is (quick when nearly bare, unhurried when just topping up). Re-measured: normal
-play never empties; even relentless spam leaves gaps under a second. The
-simulation also proved these fireflies sweep ~60% of the screen width per crossing.
-All 15 regression tests still pass.
-
-## Phase 6 — playtest round two: passes and a twirl (same pass)
-
-I did a little playtesting and gave two more notes in my own words.
-
-First, the fireflies still weren't right:
-
-- "it still just looks more like they are bouncing/floating on screen instead of
-  gently passing across screen does that make sense?"
-
-Claude's first fireflies banked toward waypoints. The fix was to make them commit
-to a direction: a firefly now makes a mostly-horizontal pass across the whole
-width, easing toward a drifting lane, with one wide swoop-turn at each edge.
-(Speed stays under the calm cap.)
-
-Second, I wanted to utilize all the character reference images you gave:
-
-- "id like to add a little animation to the fireflies when you tap them, not only
-  should it show the surprise face but the reference drawings show full body side
-  and back, can we add a cohesive little spin? would that still fit the guidelines
-  as well as not be too chaotic/frantic or overwhelming for children 4-7?"
-- "you tap them it makes the surprise face, goes to the standing position and
-  twirls on its way to the jar."
-
-I checked it against the calm rules first, then set the guardrails: one slow
-eased rotation, only on a tapped firefly (idle/sleepy ones never spin, so the
-bedtime demo stays still), and no strobe. Then we built it from the character
-sheet's own turnaround — I had Claude extract the front/three-quarter/side/back
-views, key out the sheet's grey background, and recolour the glowing belly to
-each firefly's colour so a pink or teal friend keeps its colour through the turn.
-On tap it holds the surprised front pose, then turns once — front, three-quarter,
-side, back, three-quarter, front — landing front-facing as it floats to the jar.
-It replaced the old random loop-de-loop, so the catch reads as one clear idea.
+**Polish pass (~30m, later).** Two rounds of my own playtest notes: the
+never-empty sky (the real bug was the refill counter including fireflies
+already flying to the jar — fixed with a drifting-only floor and ceiling),
+full-width traveler passes, and a tap-twirl built from the charsheet's own
+turnaround — surprised pose, then one slow eased turn front → ¾ → side → back →
+front on the way to the jar. Only tapped fireflies spin; sleepy ones never do,
+so the bedtime demo stays still. I checked the twirl against the calm rules
+before letting it be built.
