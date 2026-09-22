@@ -42,12 +42,13 @@ My direction to Claude, unedited (these steered the whole build):
 (Claude's own working prompts to sub-tools — pixel scans, flight simulations, the
 review scope — are recorded in REVIEW-BRIEF.md and the repo history.)
 
-## Rough time split (~2h 45m of the 4h cap)
+## Rough time split (~3h 15m of the 4h cap)
 
 - ~35% — design research, mechanic debate, style guide (before any code)
 - ~30% — build + fix cycles (core loop, garden, jar, expressions, idle mode)
 - ~25% — playtest-driven feel tuning (glow, flight, spawns, variety)
 - ~10% — handoff: restructure to modules, README, review brief, this write-up
+- plus one later ~30m playtest-polish pass (Phases 5–6 below)
 
 ## Phase 1 — concept, research, and the design system (~1h)
 
@@ -138,7 +139,7 @@ with per-removal verification, flagged six feel-affecting items for my decision
 rather than changing them, and left a 15-test regression suite — which I re-ran
 independently before shipping to GitHub Pages.
 
-## Phase 5 — a second playtest pass (~30m, later)
+## Phase 5 — a second playtest pass (later; Phases 5–6 together ~30m)
 
 After living with the first cut and playtesting more, two things bothered me,
 and I dictated them to Claude in my own words:
@@ -181,7 +182,7 @@ play never empties; even relentless spam leaves gaps under a second. The
 simulation also proved these fireflies sweep ~60% of the screen width per crossing.
 All 15 regression tests still pass.
 
-## Phase 6 — playtest round two: passes and a twirl (~30m, later)
+## Phase 6 — playtest round two: passes and a twirl (same pass)
 
 I did a little playtesting and gave two more notes in my own words.
 
